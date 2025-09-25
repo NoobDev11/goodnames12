@@ -34,25 +34,24 @@ class NotificationService {
     final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tzScheduled,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'habit_channel',
-          'Habit Notifications',
-          channelDescription: 'Reminders for habits',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, // required
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
-      matchDateTimeComponents:
-          recurringDaily ? DateTimeComponents.time : null,
-      androidAllowWhileIdle: true,
-    );
+  id,
+  title,
+  body,
+  tzScheduled,
+  NotificationDetails(
+    android: AndroidNotificationDetails(
+      'habit_channel',
+      'Habit Notifications',
+      channelDescription: 'Reminders for habits',
+      importance: Importance.max,
+      priority: Priority.high,
+    ),
+  ),
+  androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  matchDateTimeComponents:
+      recurringDaily ? DateTimeComponents.time : null,
+);
+
   }
 
   Future<void> cancelNotification(int id) async {
