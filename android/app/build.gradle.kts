@@ -53,10 +53,12 @@ android {
         }
     } // <-- Closing brace for buildTypes
 } // <-- Closing brace for android
+
 dependencies {
-    implementation("com.android.tools:desugar_jdk_libs:2.0.3")
-    // Add other dependencies if any
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+    // Add other dependencies here
 }
+
 flutter {
     source = "../.."
 }
