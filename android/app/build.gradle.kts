@@ -39,18 +39,19 @@ android {
     }
 
     buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("release")
-            minifyEnabled = true
-            shrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-        debug {
-            signingConfig = signingConfigs.getByName("debug")
-        }
+    getByName("release") {
+        // Configure release build type
+        // Example: signingConfig = signingConfigs.getByName("release")
+        isMinifyEnabled = true
+        isShrinkResources = true
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
+    }
+    getByName("debug") {
+        // Configure debug build type if needed
+        signingConfig = signingConfigs.getByName("debug")
     }
 }
 
