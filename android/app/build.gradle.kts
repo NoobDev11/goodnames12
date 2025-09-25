@@ -28,32 +28,30 @@ android {
     }
 
     signingConfigs {
-        release {
+        create("release") {
             // TODO: Configure your keystore for signing here
-            // Replace the file path and passwords with secure method such as CI secrets
             // storeFile = file("key.jks")
             // storePassword = "your-password"
-            // keyAlias = "key-alias"
-            // keyPassword = "your-password"
+            // keyAlias = "your-key-alias"
+            // keyPassword = "your-key-password"
         }
     }
 
     buildTypes {
-    getByName("release") {
-        // Configure release build type
-        // Example: signingConfig = signingConfigs.getByName("release")
-        isMinifyEnabled = true
-        isShrinkResources = true
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
-    }
-    getByName("debug") {
-        // Configure debug build type if needed
-        signingConfig = signingConfigs.getByName("debug")
-    }
-}
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    } // <-- Closing brace for buildTypes
+} // <-- Closing brace for android
 
 flutter {
     source = "../.."
