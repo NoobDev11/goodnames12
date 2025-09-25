@@ -33,7 +33,10 @@ class AchievementCard extends StatelessWidget {
             ),
             Text(
               '$points points',
-              style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 12),
+              style: TextStyle(
+                color: textColor.withAlpha((0.7 * 255).toInt()),
+                fontSize: 12,
+              ),
             ),
           ]),
         ),
