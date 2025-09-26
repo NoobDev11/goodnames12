@@ -78,7 +78,7 @@ class _AchievementScreenState extends State<AchievementScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Achievements'),
+        title: const Text('Medals'),
         centerTitle: true,
       ),
       body: Column(
