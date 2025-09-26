@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    // Your screens here, replace with actual widgets
+    // Replace these placeholders with your actual screens
     Center(child: Text('Home Screen')),
     Center(child: Text('Calendar Screen')),
     Center(child: Text('Stats Screen')),
@@ -37,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void _onNavBarTap(int index) {
     setState(() {
       _selectedIndex = index;
+      _controller.reset();
+      _controller.forward();
     });
   }
 
@@ -49,11 +53,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       body: FadeTransition(
         opacity: _animation,
-        child: _screens[_selectedIndex],  // Show current screen
+        child: _screens[_selectedIndex],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to add habit screen or handle adding
+          Navigator.of(context).pushNamed('/addHabit');
         },
         tooltip: 'Add new habit',
         child: const Icon(Icons.add),
