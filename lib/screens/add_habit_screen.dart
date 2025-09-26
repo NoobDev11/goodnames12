@@ -109,9 +109,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
-        '${color.green.toRadixString(16).padLeft(2, '0')}'
-        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+    final r = (color.red * 255.0).round() & 0xff;
+    final g = (color.green * 255.0).round() & 0xff;
+    final b = (color.blue * 255.0).round() & 0xff;
+    return '#${r.toRadixString(16).padLeft(2, '0')}'
+           '${g.toRadixString(16).padLeft(2, '0')}'
+           '${b.toRadixString(16).padLeft(2, '0')}';
   }
 
   void _onAddHabit() {
@@ -143,7 +146,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       );
 
       final habitProvider = context.read<HabitProvider>();
-      habitProvider.add(newHabit);
+      habitProvider.addHabit(newHabit);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Habit Added Successfully!')),
