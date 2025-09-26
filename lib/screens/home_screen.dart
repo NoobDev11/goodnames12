@@ -3,10 +3,17 @@ import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 
-// Dedicated screen widgets:
-
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
+
+  IconData _iconDataFromString(String codePoint) {
+    try {
+      final intCode = int.parse(codePoint);
+      return IconData(intCode, fontFamily: 'MaterialIcons');
+    } catch (e) {
+      return Icons.help_outline;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +25,23 @@ class HomeTab extends StatelessWidget {
       itemCount: habits.length,
       itemBuilder: (context, index) {
         final habit = habits[index];
+        final iconData = _iconDataFromString(habit.iconName);
+        final markerData = _iconDataFromString(habit.markerIcon);
+        final markerColor = Color(int.parse(habit.markerColorHex.replaceFirst('#', '0xff')));
+
         return ListTile(
           title: Text(habit.name),
           leading: CircleAvatar(
-            backgroundColor:
-                Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
-            child: const Icon(Icons.star),
+            backgroundColor: Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
+            child: Icon(iconData, color: Colors.white),
+          ),
+          trailing: Container(
+            decoration: BoxDecoration(
+              color: markerColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(6),
+            child: Icon(markerData, color: Colors.white, size: 20),
           ),
         );
       },
@@ -72,8 +90,6 @@ class SettingsScreen extends StatelessWidget {
     return const Center(child: Text('Settings Screen Content'));
   }
 }
-
-// Main HomeScreen widget
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
