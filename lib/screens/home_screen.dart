@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_provider.dart';
+import '../models/habit.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,15 +15,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late Animation<double> _animation;
 
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    // Replace these placeholders with your actual screens
-    Center(child: Text('Home Screen')),
-    Center(child: Text('Calendar Screen')),
-    Center(child: Text('Stats Screen')),
-    Center(child: Text('Achievements Screen')),
-    Center(child: Text('Settings Screen')),
-  ];
 
   @override
   void initState() {
@@ -46,6 +40,43 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final habitProvider = context.watch<HabitProvider>();
+    final List<Habit> habits = habitProvider.habits;
+
+    Widget bodyContent;
+    switch (_selectedIndex) {
+      case 0:
+        bodyContent = ListView.builder(
+          padding: const EdgeInsets.all(12),
+          itemCount: habits.length,
+          itemBuilder: (context, index) {
+            final habit = habits[index];
+            return ListTile(
+              title: Text(habit.name),
+              leading: CircleAvatar(
+                backgroundColor: Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
+                child: Icon(Icons.star), // Replace with actual icons as needed
+              ),
+            );
+          },
+        );
+        break;
+      case 1:
+        bodyContent = const Center(child: Text('Calendar Screen'));
+        break;
+      case 2:
+        bodyContent = const Center(child: Text('Stats Screen'));
+        break;
+      case 3:
+        bodyContent = const Center(child: Text('Achievements Screen'));
+        break;
+      case 4:
+        bodyContent = const Center(child: Text('Settings Screen'));
+        break;
+      default:
+        bodyContent = const Center(child: Text('Unknown Screen'));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Today'),
@@ -53,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       body: FadeTransition(
         opacity: _animation,
-        child: _screens[_selectedIndex],
+        child: bodyContent,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
