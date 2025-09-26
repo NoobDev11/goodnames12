@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/habit.dart';
+import '../providers/habit_provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({super.key});
@@ -69,9 +72,21 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   void _onAddHabit() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Use _targetDays in your model & logic, parse to int if needed.
+      final newHabit = Habit(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _habitNameController.text.trim(),
+        reminderTime: _reminderTime,
+        targetDays: int.tryParse(_targetDays ?? '') ?? 0,
+        icon: _selectedIcon ?? _habitIcons[0],
+        iconColor: _selectedIconColor ?? _iconColors[0],
+        marker: _selectedMarker ?? _customMarkers[0],
+      );
+
+      final habitProvider = context.read<HabitProvider>();
+      habitProvider.addHabit(newHabit);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Habit added! Target days: $_targetDays')),
+        const SnackBar(content: Text('Habit added!')),
       );
       Navigator.pop(context);
     }
