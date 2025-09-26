@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen>
       HomeTab(),
       CalendarScreen(),
       StatsScreen(),
-      MedalsScreen(),
+      AchievementScreen(),
       SettingsScreen(),
     ];
   }
