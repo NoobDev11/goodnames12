@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 
+// Widget to render the list of habits with proper icons and markers
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -28,11 +29,12 @@ class HomeTab extends StatelessWidget {
         final iconData = _iconDataFromString(habit.iconName);
         final markerData = _iconDataFromString(habit.markerIcon);
         final markerColor = Color(int.parse(habit.markerColorHex.replaceFirst('#', '0xff')));
+        final iconColor = Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff')));
 
         return ListTile(
           title: Text(habit.name),
           leading: CircleAvatar(
-            backgroundColor: Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
+            backgroundColor: iconColor,
             child: Icon(iconData, color: Colors.white),
           ),
           trailing: Container(
@@ -49,6 +51,7 @@ class HomeTab extends StatelessWidget {
   }
 }
 
+// Calendar Screen Placeholder
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
 
@@ -58,6 +61,7 @@ class CalendarScreen extends StatelessWidget {
   }
 }
 
+// Stats Screen Placeholder
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
 
@@ -67,6 +71,7 @@ class StatsScreen extends StatelessWidget {
   }
 }
 
+// Achievement Screen for Medals tab
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({super.key});
 
@@ -82,6 +87,7 @@ class AchievementScreen extends StatelessWidget {
   }
 }
 
+// Settings Screen Placeholder
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -91,6 +97,7 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+// Main HomeScreen widget with bottom navigation and animated transitions
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -98,30 +105,27 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-
   int _selectedIndex = 0;
-
-  late final List<Widget> _screens;
+  late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+
+    _screens = [
+      const HomeTab(),
+      const CalendarScreen(),
+      const StatsScreen(),
+      const AchievementScreen(),
+      const SettingsScreen(),
+    ];
+
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
-
-    _screens = const [
-      HomeTab(),
-      CalendarScreen(),
-      StatsScreen(),
-      AchievementScreen(),
-      SettingsScreen(),
-    ];
   }
 
   @override
