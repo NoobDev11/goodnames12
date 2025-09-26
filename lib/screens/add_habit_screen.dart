@@ -17,7 +17,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   TimeOfDay? _reminderTime;
   String? _targetDays;
   IconData? _selectedIcon;
-  String? _selectedIconColor;
+  String? _selectedColor;
   IconData? _selectedMarker;
 
   final List<IconData> _habitIcons = [
@@ -26,19 +26,19 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.bolt_rounded,
     Icons.menu_book_rounded,
     Icons.fitness_center_rounded,
-    Icons.music_note_rounded,
-    Icons.local_drink_rounded,
-    Icons.bedtime_rounded,
-    Icons.emoji_events_rounded,
-    Icons.emoji_emotions_rounded,
-    Icons.water_drop_rounded,
-    Icons.local_fire_department_rounded,
+    Icons.music_note,
+    Icons.local_drink,
+    Icons.bedtime,
+    Icons.emoji_events,
+    Icons.emoji_emotions,
+    Icons.water_drop,
+    Icons.local_fire_department,
     Icons.book,
     Icons.lightbulb,
     Icons.device_unknown,
-    Icons.account_balance_rounded,
-    Icons.account_balance_wallet_rounded,
-    Icons.airport_shuttle_rounded,
+    Icons.account_balance,
+    Icons.account_balance_wallet,
+    Icons.airport_shuttle,
   ];
 
   final List<String> _iconColors = [
@@ -50,7 +50,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6a4c93',
+    '#6a4b9d',
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -59,40 +59,44 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   ];
 
   final List<IconData> _customMarkers = [
-    Icons.check_circle_rounded,
-    Icons.arrow_circle_up_rounded,
-    Icons.arrow_circle_down_rounded,
-    Icons.build_circle_rounded,
-    Icons.pause_circle_filled_rounded,
-    Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded,
-    Icons.close_rounded,
+    Icons.check_circle,
+    Icons.arrow_circle_up,
+    Icons.arrow_circle_down,
+    Icons.build_circle,
+    Icons.pause_circle_filled,
+    Icons.play_circle_filled,
+    Icons.swap_horizontal_circle,
+    Icons.close,
     Icons.circle,
-    Icons.star_rounded,
-    Icons.stars_rounded,
-    Icons.diamond_rounded,
+    Icons.star,
+    Icons.stars,
+    Icons.diamond,
     Icons.card_giftcard,
   ];
 
   final Map<IconData, Color> _markerColors = {
-    Icons.check_circle_rounded: Colors.green,
-    Icons.arrow_circle_up_rounded: Colors.blue,
-    Icons.arrow_circle_down_rounded: Colors.blue,
-    Icons.build_circle_rounded: Colors.orange,
-    Icons.pause_circle_filled_rounded: Colors.yellow,
-    Icons.play_circle_filled_rounded: Colors.green,
-    Icons.swap_horizontal_circle_rounded: Colors.teal,
-    Icons.close_rounded: Colors.amber,
+    Icons.check_circle: Colors.green,
+    Icons.arrow_circle_up: Colors.blue,
+    Icons.arrow_circle_down: Colors.blue,
+    Icons.build_circle: Colors.orange,
+    Icons.pause_circle_filled: Colors.yellow,
+    Icons.play_circle_filled: Colors.green,
+    Icons.swap_horizontal_circle: Colors.teal,
+    Icons.close: Colors.amber,
     Icons.circle: Colors.green,
-    Icons.star_rounded: Colors.teal,
-    Icons.stars_rounded: Colors.red,
-    Icons.diamond_rounded: Colors.purple,
+    Icons.star: Colors.teal,
+    Icons.stars: Colors.red,
+    Icons.diamond: Colors.purple,
     Icons.card_giftcard: Colors.orange,
   };
 
+  void _disposeTextEditingControllers() {
+    _habitNameController.dispose();
+  }
+
   @override
   void dispose() {
-    _habitNameController.dispose();
+    _disposeTextEditingControllers();
     super.dispose();
   }
 
@@ -100,20 +104,18 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     final TimeOfDay? picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) {
-      setState(() {
-        _reminderTime = picked;
-      });
+      setState(() => _reminderTime = picked);
     }
   }
 
   String colorToHex(Color color) {
-    return '#$(color.red * 255.0).round() & 0xff'
-        '$(color.green * 255.0).round() & 0xff'
-        '$(color.blue * 255.0).round() & 0xff;
+    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
+        '${color.green.toRadixString(16).padLeft(2, '0')}'
+        '${color.blue.toRadixString(16).padLeft(2, '0')}';
   }
 
   void _onAddHabit() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState?.validate() ?? false) {
       DateTime? reminderDateTime;
       if (_reminderTime != null) {
         final now = DateTime.now();
@@ -126,29 +128,27 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         );
       }
 
-      final markerColor = _selectedMarker != null
-          ? _markerColors[_selectedMarker!] ?? Colors.grey
-          : _markerColors[_customMarkers[0]]!;
+      final Color markerColor =
+          _markerColors[_selectedMarker] ?? _markerColors[_customMarkers[0]]!;
 
       final newHabit = Habit(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _habitNameController.text.trim(),
         reminderTime: reminderDateTime,
         targetDays: int.tryParse(_targetDays ?? '') ?? 0,
-        iconName:
-            _selectedIcon?.codePoint.toString() ?? _habitIcons[0].codePoint.toString(),
-        iconColorHex: _selectedIconColor ?? _iconColors[0],
-        markerIcon: _selectedMarker?.codePoint.toString() ??
-            _customMarkers[0].codePoint.toString(),
+        iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
+        iconColorHex: _selectedColor ?? _iconColors[0],
+        markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
         markerColorHex: colorToHex(markerColor),
       );
 
       final habitProvider = context.read<HabitProvider>();
-      habitProvider.addHabit(newHabit);
+      habitProvider.add(newHabit);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Habit added!')),
+        const SnackBar(content: Text('Habit Added Successfully!')),
       );
+
       Navigator.pop(context);
     }
   }
@@ -200,7 +200,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   Expanded(
                     child: Semantics(
                       label: 'Reminder time picker',
-                      hint: 'Tap to select a daily reminder time',
+                      hint: 'Tap to select a reminder time',
                       child: InkWell(
                         onTap: _selectReminderTime,
                         child: InputDecorator(
@@ -209,9 +209,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.alarm),
                           ),
-                          child: Text(_reminderTime == null
-                              ? 'Optional'
-                              : _reminderTime!.format(context)),
+                          child: Text(
+                            _reminderTime == null
+                                ? 'Optional'
+                                : _reminderTime!.format(context),
+                          ),
                         ),
                       ),
                     ),
@@ -254,15 +256,17 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                       child: CircleAvatar(
                         backgroundColor:
                             isSelected ? Colors.deepPurple : Colors.grey[300],
-                        child: Icon(icon,
-                            color: isSelected ? Colors.white : Colors.black45),
+                        child: Icon(
+                          icon,
+                          color: isSelected ? Colors.white : Colors.black45,
+                        ),
                       ),
                     );
                   },
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Select Icon Color'),
+              const Text('Select Color'),
               const SizedBox(height: 8),
               SizedBox(
                 height: 40,
@@ -272,14 +276,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   separatorBuilder: (_, __) => const SizedBox(width: 6),
                   itemBuilder: (context, index) {
                     final hex = _iconColors[index];
-                    final isSelected = _selectedIconColor == hex;
-                    Color c = _colorFromHex(hex);
+                    final isSelected = _selectedColor == hex;
+                    final color = _colorFromHex(hex);
                     return GestureDetector(
                       onTap: () => setState(() {
-                        _selectedIconColor = hex;
+                        _selectedColor = hex;
                       }),
                       child: CircleAvatar(
-                        backgroundColor: c,
+                        backgroundColor: color,
                         child: isSelected
                             ? const Icon(Icons.check, color: Colors.white)
                             : null,
@@ -289,7 +293,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Select Custom Marker'),
+              const Text('Select Marker'),
               const SizedBox(height: 8),
               SizedBox(
                 height: 40,
@@ -300,7 +304,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   itemBuilder: (context, index) {
                     final marker = _customMarkers[index];
                     final isSelected = _selectedMarker == marker;
-                    Color? markerColor = _markerColors[marker];
+                    final markerColor = _markerColors[marker] ?? Colors.grey;
                     return GestureDetector(
                       onTap: () => setState(() {
                         _selectedMarker = marker;
@@ -311,8 +315,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           color: isSelected ? markerColor : Colors.grey[300],
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(marker,
-                            color: isSelected ? Colors.white : Colors.black45),
+                        child: Icon(
+                          marker,
+                          color: isSelected ? Colors.white : Colors.black45,
+                        ),
                       ),
                     );
                   },
