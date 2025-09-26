@@ -45,7 +45,6 @@ class Habit {
     );
   }
 
-  // ----- ADD THESE FOR STORAGE -----
   factory Habit.fromJson(Map<String, dynamic> json) {
     return Habit(
       id: json['id'] as String,
