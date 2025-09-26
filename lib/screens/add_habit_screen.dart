@@ -72,14 +72,22 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   void _onAddHabit() {
     if (_formKey.currentState!.validate()) {
+      DateTime? reminderDateTime;
+      if (_reminderTime != null) {
+        final now = DateTime.now();
+        reminderDateTime = DateTime(
+          now.year, now.month, now.day, _reminderTime!.hour, _reminderTime!.minute);
+      }
+
       final newHabit = Habit(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _habitNameController.text.trim(),
-        reminderTime: _reminderTime,
+        reminderTime: reminderDateTime,
         targetDays: int.tryParse(_targetDays ?? '') ?? 0,
-        icon: _selectedIcon ?? _habitIcons[0],
-        iconColor: _selectedIconColor ?? _iconColors[0],
-        marker: _selectedMarker ?? _customMarkers[0],
+        iconName: _selectedIcon ?? _habitIcons[0],
+        iconColorHex: _selectedIconColor ?? _iconColors[0],
+        markerIcon: _selectedMarker ?? _customMarkers[0],
+        markerColorHex: '#000000', // Provide a default or selectable marker color
       );
 
       final habitProvider = context.read<HabitProvider>();
