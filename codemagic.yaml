@@ -18,4 +18,4 @@ workflows:
         script: flutter build ios --debug --no-codesign
     artifacts:
       - build/app/outputs/apk/debug/habitta.apk
-      - build/ios/iphoneos/Runner.app
+     
