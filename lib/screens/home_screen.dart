@@ -18,18 +18,18 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final habitProvider = context.watch<HabitProvider>();
-    final habits = habitProvider.habits;
+    final HabitProvider habitProvider = context.watch<HabitProvider>();
+    final List<Habit> habits = habitProvider.habits;
 
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: habits.length,
       itemBuilder: (context, index) {
-        final habit = habits[index];
-        final iconData = _iconDataFromString(habit.iconName);
-        final markerData = _iconDataFromString(habit.markerIcon);
-        final markerColor = Color(int.parse(habit.markerColorHex.replaceFirst('#', '0xff')));
-        final iconColor = Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff')));
+        final Habit habit = habits[index];
+        final IconData iconData = _iconDataFromString(habit.iconName);
+        final IconData markerData = _iconDataFromString(habit.markerIcon);
+        final Color markerColor = Color(int.parse(habit.markerColorHex.replaceFirst('#', '0xff')));
+        final Color iconColor = Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff')));
 
         return ListTile(
           title: Text(habit.name),
@@ -51,7 +51,8 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// Calendar Screen Placeholder
+// Rest of screen placeholders
+
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
 
@@ -61,7 +62,6 @@ class CalendarScreen extends StatelessWidget {
   }
 }
 
-// Stats Screen Placeholder
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
 
@@ -71,7 +71,6 @@ class StatsScreen extends StatelessWidget {
   }
 }
 
-// Achievement Screen for Medals tab
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({super.key});
 
@@ -87,7 +86,6 @@ class AchievementScreen extends StatelessWidget {
   }
 }
 
-// Settings Screen Placeholder
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -97,7 +95,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-// Main HomeScreen widget with bottom navigation and animated transitions
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -105,7 +102,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   int _selectedIndex = 0;
@@ -123,7 +121,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       const SettingsScreen(),
     ];
 
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
   }
