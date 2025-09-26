@@ -109,9 +109,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-    return '#$(*.r * 255.0).round() & 0xff'
-    '$(*.g * 255.0).round() & 0xff'
-    '$(*.b * 255.0).round() & 0xff';
+    return '#$(color.r * 255.0).round() & 0xff'
+    '$(color.g * 255.0).round() & 0xff'
+    '$(color.b * 255.0).round() & 0xff';
   }
 
   void _onAddHabit() {
