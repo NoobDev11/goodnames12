@@ -20,18 +20,25 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   String? _selectedIconColor;
   String? _selectedMarker;
 
-  final List<String> _habitIcons = [
-    'running',
-    'meditation',
-    'reading',
-    'exercise',
-    'music',
-    'reading',
-    'drink',
-    'sleep',
-    'trophy',
-    'book',
-    'other',
+  final List<IconData> _habitIcons = [
+    Icons.directions_run,
+    Icons.spa_rounded,
+    Icons.bolt_rounded,
+    Icons.menu_book_rounded,
+    Icons.fitness_center_rounded,
+    Icons.music_note_rounded,
+    Icons.local_drink_rounded,
+    Icons.bedtime_rounded,
+    Icons.emoji_events_rounded,
+    Icons.emoji_emotions_rounded,
+    Icons.water_drop_rounded,
+    Icons.local_fire_department_rounded,
+    Icons.book,
+    Icons.lightbulb,
+    Icons.device_unknown,
+    Icons.account_balance_rounded,
+    Icons.account_balance_wallet_rounded,
+    Icons.airport_shuttle_rounded,
   ];
 
   final List<String> _iconColors = [
@@ -43,15 +50,16 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#ff6f91',
   ];
 
-  final List<String> _customMarkers = [
-    'check',
-    'cross',
-    'circle',
-    'arrow_up',
-    'star',
-    'diamond',
-    'gift',
-    'fire',
+  final List<IconData> _customMarkers = [
+    Icons.check,
+    Icons.close,
+    Icons.circle,
+    Icons.arrow_upward,
+    Icons.star,
+    Icons.diamond,
+    Icons.card_giftcard,
+    Icons.whatshot,
+    Icons.
   ];
 
   @override
