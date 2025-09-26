@@ -67,8 +67,8 @@ class StatsScreen extends StatelessWidget {
   }
 }
 
-class MedalsScreen extends StatelessWidget {
-  const MedalsScreen({super.key});
+class AchievementScreen extends StatelessWidget {
+  const AchievementScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
