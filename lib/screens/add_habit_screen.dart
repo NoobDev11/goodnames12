@@ -107,9 +107,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
-        '${color.green.toRadixString(16).padLeft(2, '0')}'
-        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+    return '#$(color.red * 255.0).round() & 0xff'
+        '$(color.green * 255.0).round() & 0xff'
+        '$(color.blue * 255.0).round() & 0xff;
   }
 
   void _onAddHabit() {
