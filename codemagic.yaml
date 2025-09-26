@@ -27,7 +27,7 @@ workflows:
         script: |
           git config --global user.email "ryborggames@google.com"
           git config --global user.name "NoobDev11"
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/yourusername/yourrepo.git repo
+          git clone https://x-access-token:${GITHUB_TOKEN}@https://github.com/NoobDev11/goodnames12.git repo
           cd repo
           git checkout -B apks
           cp ../build/app/outputs/flutter-apk/app-debug.apk ./app-debug-${CM_BUILD_NUMBER}.apk
