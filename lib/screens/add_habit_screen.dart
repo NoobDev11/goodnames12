@@ -106,6 +106,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
+  String colorToHex(Color color) {
+    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
+        '${color.green.toRadixString(16).padLeft(2, '0')}'
+        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+  }
+
   void _onAddHabit() {
     if (_formKey.currentState!.validate()) {
       DateTime? reminderDateTime;
@@ -120,6 +126,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         );
       }
 
+      final markerColor = _selectedMarker != null
+          ? _markerColors[_selectedMarker!] ?? Colors.grey
+          : _markerColors[_customMarkers[0]]!;
+
       final newHabit = Habit(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _habitNameController.text.trim(),
@@ -130,9 +140,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         iconColorHex: _selectedIconColor ?? _iconColors[0],
         markerIcon: _selectedMarker?.codePoint.toString() ??
             _customMarkers[0].codePoint.toString(),
-        markerColorHex: _selectedMarker != null
-            ? '#${_markerColors[_selectedMarker!]!.value.toRadixString(16).substring(2)}'
-            : '#${_markerColors[_customMarkers[0]]!.value.toRadixString(16).substring(2)}',
+        markerColorHex: colorToHex(markerColor),
       );
 
       final habitProvider = context.read<HabitProvider>();
