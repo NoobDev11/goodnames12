@@ -43,25 +43,69 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   final List<String> _iconColors = [
     '#ff595e',
+    '#f15152',
     '#ffca3a',
+    '#f2af29',
+    '#f18f01',
     '#8ac926',
+    '#086375',
     '#1982c4',
     '#6a4c93',
+    '#69b578',
     '#ff6f91',
+    '#028090',
+    '#a44200',
+    '#950952',
   ];
 
   final List<IconData> _customMarkers = [
-    Icons.check,
-    Icons.close,
+    Icons.check_circle_rounded,
+    Icons.arrow_circle_up_rounded,
+    Icons.arrow_circle_down_rounded,
+    Icons.build_circle_rounded,
+    Icons.pause_circle_filled_rounded,
+    Icons.play_circle_filled_rounded,
+    Icons.swap_horizontal_circle_rounded,
+    Icons.close_rounded,
     Icons.circle,
-    Icons.arrow_upward,
-    Icons.star,
-    Icons.diamond,
+    Icons.star_rounded,
+    Icons.stars_rounded,
+    Icons.diamond_rounded,
     Icons.card_giftcard,
-    Icons.whatshot,
-    Icons.
   ];
+final Map<IconData, Color> _markerColors = {
+  Icons.check_circle_rounded: Colors.green,
+  Icons.arrow_circle_up_rounded: Colors.blue,
+  Icons.arrow_circle_down_rounded: Colors.blue,
+  Icons.build_circle_rounded: Colors.orange,
+  Icons.pause_circle_filled_rounded: Colors.yellow,
+  Icons.play_circle_filled_rounded: Coloes.green,
+  Icons.swap_horizontal_circle_rounded: Colors.teal,
+  Icons.close_rounded: Colors.amber,
+  Icons.circle: Colors.green,
+  Icons.star_rounded: Colors.green,
+  Icons.star_rounded: Colors.blue,
+  Icons.star_rounded: Colors.red,
+  Icons.stars_rounded: Colors.green,
+  Icons.stars_rounded: Colors.blue,
+  Icons.stars_rounded: Colors.red,
+  Icons.diamond_rounded: Colors.purple,
+  Icons.card_giftcard: Colors:orange,
+};
 
+// When building custom marker widgets, get the color for each icon:
+child: Icon(
+  _customMarkers[index],
+  color: isSelected
+      ? Colors.white
+      : _markerColors[_customMarkers[index]] ?? Colors.black45,
+),
+decoration: BoxDecoration(
+  color: isSelected
+      ? _markerColors[_customMarkers[index]]
+      : Colors.grey[300],
+  borderRadius: BorderRadius.circular(12),
+),
   @override
   void dispose() {
     _habitNameController.dispose();
