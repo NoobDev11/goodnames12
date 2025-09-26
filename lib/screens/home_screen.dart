@@ -3,6 +3,78 @@ import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 
+// Dedicated screen widgets:
+
+class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final habitProvider = context.watch<HabitProvider>();
+    final habits = habitProvider.habits;
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: habits.length,
+      itemBuilder: (context, index) {
+        final habit = habits[index];
+        return ListTile(
+          title: Text(habit.name),
+          leading: CircleAvatar(
+            backgroundColor:
+                Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
+            child: const Icon(Icons.star),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CalendarScreen extends StatelessWidget {
+  const CalendarScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Calendar Screen Content'));
+  }
+}
+
+class StatsScreen extends StatelessWidget {
+  const StatsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Stats Screen Content'));
+  }
+}
+
+class MedalsScreen extends StatelessWidget {
+  const MedalsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Medals'),
+        centerTitle: true,
+      ),
+      body: const Center(child: Text('Medals Screen Content')),
+    );
+  }
+}
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Settings Screen Content'));
+  }
+}
+
+// Main HomeScreen widget
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -10,18 +82,30 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   int _selectedIndex = 0;
 
+  late final List<Widget> _screens;
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
+
+    _screens = const [
+      HomeTab(),
+      CalendarScreen(),
+      StatsScreen(),
+      MedalsScreen(),
+      SettingsScreen(),
+    ];
   }
 
   @override
@@ -40,43 +124,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final habitProvider = context.watch<HabitProvider>();
-    final List<Habit> habits = habitProvider.habits;
-
-    Widget bodyContent;
-    switch (_selectedIndex) {
-      case 0:
-        bodyContent = ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: habits.length,
-          itemBuilder: (context, index) {
-            final habit = habits[index];
-            return ListTile(
-              title: Text(habit.name),
-              leading: CircleAvatar(
-                backgroundColor: Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff'))),
-                child: Icon(Icons.star), // Replace with actual icons as needed
-              ),
-            );
-          },
-        );
-        break;
-      case 1:
-        bodyContent = const Center(child: Text('Calendar Screen'));
-        break;
-      case 2:
-        bodyContent = const Center(child: Text('Stats Screen'));
-        break;
-      case 3:
-        bodyContent = const Center(child: Text('Achievements Screen'));
-        break;
-      case 4:
-        bodyContent = const Center(child: Text('Settings Screen'));
-        break;
-      default:
-        bodyContent = const Center(child: Text('Unknown Screen'));
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Today'),
@@ -84,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       body: FadeTransition(
         opacity: _animation,
-        child: bodyContent,
+        child: _screens[_selectedIndex],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
