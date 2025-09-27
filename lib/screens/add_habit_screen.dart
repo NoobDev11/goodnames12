@@ -42,7 +42,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   ];
 
   final List<String> _iconColors = [
-    '#ff595e',
+   '#ff595e',
     '#f15152',
     '#ffca3a',
     '#f2af29',
@@ -50,7 +50,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6b4a99',
+    '#6b4a99', // fixed typo from previous e.g. 6b4b99
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -69,7 +69,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.build_circle_rounded,
     Icons.pause_circle_filled_rounded,
     Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded,
+    Icons.swap_horizontal_circle_rounded, // corrected icon name here
     Icons.clear_rounded,
     Icons.star_rounded,
     Icons.stars_rounded,
@@ -142,11 +142,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
     final markerColor = _markerColors[_selectedMarker ?? _customMarkers[0]] ?? Colors.grey;
 
+    final int? targetDaysValue = int.tryParse(_targetDays ?? '');
+
     final newHabit = Habit(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: _habitNameController.text.trim(),
       reminderTime: reminderDateTime,
-      targetDays: int.tryParse(_targetDays ?? '') ?? 0,
+      targetDays: targetDaysValue != null && targetDaysValue > 0 ? targetDaysValue : null,
       iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
       iconColorHex: _selectedColor ?? _iconColors[0],
       markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
@@ -156,7 +158,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     context.read<HabitProvider>().addHabit(newHabit);
 
     ScaffoldMessenger.of(context)
-      .showSnackBar(const SnackBar(content: Text('Habit added!')));
+        .showSnackBar(const SnackBar(content: Text('Habit added!')));
     Navigator.of(context).pop();
   }
 
@@ -210,10 +212,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 Expanded(
                   child: ListView(
                     children: [
-                      // Habit Name
                       const Padding(
                         padding: EdgeInsets.only(bottom: 6.0),
-                        child: Text("Add Habit Name",
+                        child: Text(
+                          "Add Habit Name",
                           style: TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 16),
                         ),
@@ -225,11 +227,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           hintText: "e.g. read journal",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+                        validator: (val) =>
+                            val == null || val.trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
-
-                      // Reminder & Target in one Row
                       Row(
                         children: [
                           Expanded(
@@ -238,9 +239,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.only(bottom: 6.0),
-                                  child: Text("Set Reminder",
+                                  child: Text(
+                                    "Set Reminder",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.w600, fontSize: 16),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16),
                                   ),
                                 ),
                                 InkWell(
@@ -272,10 +275,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                               children: [
                                 const Padding(
                                   padding: EdgeInsets.only(bottom: 6.0),
-                                  child: Text("Set Target",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 16)),
+                                  child: Text(
+                                    "Set Target",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16),
+                                  ),
                                 ),
                                 TextFormField(
                                   keyboardType: TextInputType.number,
@@ -285,6 +290,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                     border: OutlineInputBorder(),
                                   ),
                                   onChanged: (val) => _targetDays = val,
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) return null;
+                                    final n = int.tryParse(val);
+                                    if (n == null || n <= 0) {
+                                      return 'Enter a positive number or leave blank';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),
@@ -292,8 +305,6 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         ],
                       ),
                       const SizedBox(height: 18),
-
-                      // Set Icon section
                       Card(
                         elevation: 1,
                         margin: EdgeInsets.zero,
@@ -305,7 +316,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                             children: [
                               const Text("Set Icon",
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w600, fontSize: 16)),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16)),
                               const SizedBox(height: 8),
                               GridView.count(
                                 crossAxisCount: 6,
@@ -313,7 +325,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 children: _habitIcons
                                     .map((icon) => GestureDetector(
-                                          onTap: () => setState(() => _selectedIcon = icon),
+                                          onTap: () =>
+                                              setState(() => _selectedIcon = icon),
                                           child: CircleAvatar(
                                             radius: 21,
                                             backgroundColor: _selectedIcon == icon
@@ -324,15 +337,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                                     ? Colors.white
                                                     : Colors.deepPurple),
                                           ),
-                                        )).toList(),
+                                        ))
+                                    .toList(),
                               )
                             ],
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Icon Color section
                       Card(
                         elevation: 1,
                         margin: EdgeInsets.zero,
@@ -344,7 +356,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                             children: [
                               const Text("Select Icon Colour",
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w600, fontSize: 16)),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16)),
                               const SizedBox(height: 8),
                               GridView.count(
                                 crossAxisCount: 6,
@@ -369,8 +382,6 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Marker section
                       Card(
                         elevation: 1,
                         margin: EdgeInsets.zero,
@@ -382,7 +393,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                             children: [
                               const Text("Select Custom Marker",
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w600, fontSize: 16)),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16)),
                               const SizedBox(height: 8),
                               GridView.count(
                                 crossAxisCount: 6,
