@@ -1,3 +1,35 @@
+class Achievement {
+  final int days;
+  final int points;
+  final bool achieved;
+  final String? label;
+
+  Achievement({
+    required this.days,
+    required this.points,
+    required this.achieved,
+    this.label,
+  });
+
+  factory Achievement.fromJson(Map<String, dynamic> json) {
+    return Achievement(
+      days: json['days'] as int,
+      points: json['points'] as int,
+      achieved: json['achieved'] as bool,
+      label: json['label'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'days': days,
+      'points': points,
+      'achieved': achieved,
+      'label': label,
+    };
+  }
+}
+
 class Habit {
   final String id;
   final String name;
@@ -9,8 +41,7 @@ class Habit {
   final int? targetDays; // optional target streak
   final bool notificationsEnabled;
 
-  // Optional achievements list for each habit
-  // final List<Achievement>? achievements;
+  final List<Achievement>? achievements;
 
   Habit({
     required this.id,
@@ -22,7 +53,7 @@ class Habit {
     this.reminderTime,
     this.targetDays,
     this.notificationsEnabled = true,
-    // this.achievements,
+    this.achievements,
   });
 
   Habit copyWith({
@@ -35,7 +66,7 @@ class Habit {
     DateTime? reminderTime,
     int? targetDays,
     bool? notificationsEnabled,
-    // List<Achievement>? achievements,
+    List<Achievement>? achievements,
   }) {
     return Habit(
       id: id ?? this.id,
@@ -47,7 +78,7 @@ class Habit {
       reminderTime: reminderTime ?? this.reminderTime,
       targetDays: targetDays ?? this.targetDays,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      // achievements: achievements ?? this.achievements,
+      achievements: achievements ?? this.achievements,
     );
   }
 
@@ -64,9 +95,11 @@ class Habit {
           : null,
       targetDays: json['targetDays'] != null ? json['targetDays'] as int : null,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      // achievements: (json['achievements'] as List<dynamic>?)
-      //     ?.map((a) => Achievement.fromJson(a as Map<String, dynamic>))
-      //     .toList(),
+      achievements: json['achievements'] != null
+          ? (json['achievements'] as List<dynamic>)
+              .map((a) => Achievement.fromJson(a as Map<String, dynamic>))
+              .toList()
+          : null,
     );
   }
 
@@ -81,7 +114,7 @@ class Habit {
       'reminderTime': reminderTime?.toIso8601String(),
       'targetDays': targetDays,
       'notificationsEnabled': notificationsEnabled,
-      // 'achievements': achievements?.map((a) => a.toJson()).toList(),
+      'achievements': achievements?.map((a) => a.toJson()).toList(),
     };
   }
 }
