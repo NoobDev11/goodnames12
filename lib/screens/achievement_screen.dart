@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
+import '../models/achievement.dart'; // Import Achievement model if separate
 
 class AchievementScreen extends StatefulWidget {
   const AchievementScreen({super.key});
@@ -20,8 +21,10 @@ class _AchievementScreenState extends State<AchievementScreen>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
 
@@ -36,9 +39,6 @@ class _AchievementScreenState extends State<AchievementScreen>
   }
 
   List<Achievement> _getAchievementsForHabit(Habit habit) {
-    // Replace with actual achievements list for habit
-    // If habit has `achievements` property this is direct.
-    // Else fetch from provider related to milestones
     return habit.achievements ?? [];
   }
 
@@ -54,7 +54,10 @@ class _AchievementScreenState extends State<AchievementScreen>
   Widget build(BuildContext context) {
     final habitProvider = context.watch<HabitProvider>();
     final habits = habitProvider.habits;
-    final habit = habits.firstWhere((h) => h.id == _selectedHabitId, orElse: () => habits.isNotEmpty ? habits.first : null);
+    final habit = habits.firstWhere(
+      (h) => h.id == _selectedHabitId,
+      orElse: () => habits.isNotEmpty ? habits.first : null,
+    );
 
     if (habit == null) {
       return const Scaffold(
