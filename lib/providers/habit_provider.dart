@@ -5,14 +5,13 @@ import '../data/local_storage.dart';
 
 class HabitProvider extends ChangeNotifier {
   List<Habit> _habits = [];
-  Map<String, bool> _habitMarked = {};
+  Map<String, bool> _habitCompletedToday = {};
 
   List<Habit> get habits => _habits;
-  Map<String, bool> get habitMarked => _habitMarked;
 
   HabitProvider() {
     _loadHabits();
-    _loadHabitMarked();
+    _loadHabitCompletedToday();
   }
 
   Future<void> _loadHabits() async {
@@ -53,9 +52,9 @@ class HabitProvider extends ChangeNotifier {
 
   Future<void> removeHabit(String id) async {
     _habits.removeWhere((h) => h.id == id);
-    _habitMarked.remove(id);
+    _habitCompletedToday.remove(id);
     await _saveHabits();
-    await _saveHabitMarked();
+    await _saveHabitCompletedToday();
     notifyListeners();
   }
 
@@ -67,27 +66,33 @@ class HabitProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadHabitMarked() async {
-    final jsonString = await LocalStorage().getString('habitMarked');
+  Future<void> _loadHabitCompletedToday() async {
+    final jsonString = await LocalStorage().getString('habitCompletedToday');
     if (jsonString != null) {
       try {
         final Map<String, dynamic> map = jsonDecode(jsonString);
-        _habitMarked = map.map((k, v) => MapEntry(k, v as bool));
+        _habitCompletedToday = map.map((k, v) => MapEntry(k, v as bool));
       } catch (_) {
-        _habitMarked = {};
+        _habitCompletedToday = {};
       }
     }
     notifyListeners();
   }
 
-  Future<void> _saveHabitMarked() async {
-    await LocalStorage().saveString('habitMarked', jsonEncode(_habitMarked));
+  Future<void> _saveHabitCompletedToday() async {
+    await LocalStorage().saveString('habitCompletedToday', jsonEncode(_habitCompletedToday));
   }
 
-  void toggleHabitMarked(Habit habit) {
-    final current = _habitMarked[habit.id] ?? false;
-    _habitMarked[habit.id] = !current;
-    _saveHabitMarked();
+  // MAIN: marking/unmarking logic for today, triggers marker on home screen
+  void toggleHabitCompleted(String id) {
+    bool current = _habitCompletedToday[id] ?? false;
+    _habitCompletedToday[id] = !current;
+    _saveHabitCompletedToday();
     notifyListeners();
+  }
+
+  // Helper to expose today's state to UI, e.g. for the card trailing marker/icon
+  bool isHabitCompletedToday(String id) {
+    return _habitCompletedToday[id] ?? false;
   }
 }
