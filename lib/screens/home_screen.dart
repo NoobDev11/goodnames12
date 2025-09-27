@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 
-// Widget to render the list of habits with proper icons and markers
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -16,9 +15,29 @@ class HomeTab extends StatelessWidget {
     }
   }
 
+  String? _formatTime(DateTime? dateTime) {
+    if (dateTime == null) return null;
+    var hour = dateTime.hour;
+    var minute = dateTime.minute.toString().padLeft(2, '0');
+    var suffix = "AM";
+    if (hour >= 12) {
+      suffix = "PM";
+      if (hour > 12) hour -= 12;
+    }
+    if (hour == 0) hour = 12;
+    return '$hour:$minute $suffix';
+  }
+
+  Color _colorFromHex(String hex) {
+    final buffer = StringBuffer();
+    if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+    buffer.write(hex.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final HabitProvider habitProvider = context.watch<HabitProvider>();
+    final habitProvider = context.watch<HabitProvider>();
     final List<Habit> habits = habitProvider.habits;
 
     return ListView.builder(
@@ -28,22 +47,49 @@ class HomeTab extends StatelessWidget {
         final Habit habit = habits[index];
         final IconData iconData = _iconDataFromString(habit.iconName);
         final IconData markerData = _iconDataFromString(habit.markerIcon);
-        final Color markerColor = Color(int.parse(habit.markerColorHex.replaceFirst('#', '0xff')));
-        final Color iconColor = Color(int.parse(habit.iconColorHex.replaceFirst('#', '0xff')));
+        final Color markerColor = _colorFromHex(habit.markerColorHex);
+        final Color iconColor = _colorFromHex(habit.iconColorHex);
 
-        return ListTile(
-          title: Text(habit.name),
-          leading: CircleAvatar(
-            backgroundColor: iconColor,
-            child: Icon(iconData, color: Colors.white),
-          ),
-          trailing: Container(
-            decoration: BoxDecoration(
-              color: markerColor,
-              borderRadius: BorderRadius.circular(12),
+        final bool isDone = habit.isCompletedToday ?? false;
+
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 7),
+          elevation: 4,
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: iconColor,
+              child: Icon(iconData, color: Colors.white),
             ),
-            padding: const EdgeInsets.all(6),
-            child: Icon(markerData, color: Colors.white, size: 20),
+            title: Text(
+              habit.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+            ),
+            subtitle: habit.reminderTime != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
+                      const SizedBox(width: 4),
+                      Text(_formatTime(habit.reminderTime)!,
+                          style: const TextStyle(color: Colors.deepPurple)),
+                    ],
+                  )
+                : null,
+            trailing: GestureDetector(
+              onTap: () {
+                habitProvider.toggleHabitCompleted(habit.id);
+              },
+              child: isDone
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: markerColor,
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      padding: const EdgeInsets.all(7),
+                      child: Icon(markerData, color: Colors.white, size: 24),
+                    )
+                  : Icon(Icons.radio_button_unchecked, color: Colors.grey, size: 24),
+            ),
           ),
         );
       },
@@ -51,53 +97,56 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// Rest of screen placeholders
-
+// Actual calendar widget page
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Calendar Screen Content'));
-  }
-}
-
-class StatsScreen extends StatelessWidget {
-  const StatsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Stats Screen Content'));
-  }
-}
-
-class AchievementScreen extends StatelessWidget {
-  const AchievementScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Medals'),
-        centerTitle: true,
-      ),
-      body: const Center(child: Text('Medals Screen Content')),
+      appBar: AppBar(title: const Text('Calendar')),
+      body: Center(child: Text('Your full calendar UI goes here.')),
     );
   }
 }
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
-
+// Actual stats widget page
+class StatsScreen extends StatelessWidget {
+  const StatsScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Settings Screen Content'));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Stats')),
+      body: Center(child: Text('Your stats and graphs go here.')),
+    );
+  }
+}
+
+// Real achievements page widget
+class AchievementScreen extends StatelessWidget {
+  const AchievementScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Achievements')),
+      body: Center(child: Text('Show badges and completed goals here.')),
+    );
+  }
+}
+
+// Real settings page widget
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: Center(child: Text('Settings UI here.')),
+    );
   }
 }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -112,7 +161,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-
     _screens = [
       const HomeTab(),
       const CalendarScreen(),
@@ -120,7 +168,6 @@ class _HomeScreenState extends State<HomeScreen>
       const AchievementScreen(),
       const SettingsScreen(),
     ];
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -146,10 +193,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Today'),
-        centerTitle: true,
-      ),
       body: FadeTransition(
         opacity: _animation,
         child: _screens[_selectedIndex],
