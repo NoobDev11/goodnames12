@@ -142,15 +142,15 @@ class HabitProvider extends ChangeNotifier {
 
   List<Achievement> _initDefaultAchievements() {
     return [
-      Achievement(days: 3, points: 5, achieved: false, medalIconAsset: 'assets/medals/medal_3_days.png'),
-      Achievement(days: 7, points: 10, achieved: false, medalIconAsset: 'assets/medals/medal_7_days.png'),
-      Achievement(days: 15, points: 15, achieved: false, medalIconAsset: 'assets/medals/medal_15_days.png'),
-      Achievement(days: 30, points: 20, achieved: false, medalIconAsset: 'assets/medals/medal_30_days.png'),
-      Achievement(days: 60, points: 30, achieved: false, medalIconAsset: 'assets/medals/medal_60_days.png'),
-      Achievement(days: 90, points: 50, achieved: false, medalIconAsset: 'assets/medals/medal_90_days.png'),
-      Achievement(days: 180, points: 75, achieved: false, medalIconAsset: 'assets/medals/medal_180_days.png'),
-      Achievement(days: 365, points: 100, achieved: false, medalIconAsset: 'assets/medals/medal_365_days.png'),
-      Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Set Target', medalIconAsset: 'assets/medals/medal_custom.png'),
+      Achievement(days: 3, points: 5, achieved: false, medalIconAsset: 'assets/icons/medal_3_days.png'),
+      Achievement(days: 7, points: 10, achieved: false, medalIconAsset: 'assets/icons/medal_7_days.png'),
+      Achievement(days: 15, points: 15, achieved: false, medalIconAsset: 'assets/icons/medal_15_days.png'),
+      Achievement(days: 30, points: 20, achieved: false, medalIconAsset: 'assets/icons/medal_30_days.png'),
+      Achievement(days: 60, points: 30, achieved: false, medalIconAsset: 'assets/icons/medal_60_days.png'),
+      Achievement(days: 90, points: 50, achieved: false, medalIconAsset: 'assets/icons/medal_90_days.png'),
+      Achievement(days: 180, points: 75, achieved: false, medalIconAsset: 'assets/icons/medal_180_days.png'),
+      Achievement(days: 365, points: 100, achieved: false, medalIconAsset: 'assets/icons/medal_365_days.png'),
+      Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Set Target', medalIconAsset: 'assets/icons/medal_custom_days.png'),
     ];
   }
 
