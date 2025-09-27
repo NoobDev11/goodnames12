@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../providers/habit_provider.dart';
 import '../providers/habit_stats_provider.dart';
 import '../models/habit.dart';
+import '../models/achievement.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -16,35 +17,37 @@ class _StatsScreenState extends State<StatsScreen> {
   String _selectedHabitId = 'all';
 
   List<Habit> get _habits => context.read<HabitProvider>().habits;
+  
   List<String> get _habitFilterIds => ['all', ..._habits.map((h) => h.id)];
 
   String _habitNameById(String id) {
     if (id == 'all') return 'All Habits';
-    return _habits.firstWhere((h) => h.id == id, orElse: () => Habit(
-      id: 'all',
-      name: 'Unknown',
-      iconName: '',
-      iconColorHex: '',
-      markerIcon: '',
-      markerColorHex: ''
-    )).name;
+    final habit = _habits.firstWhere(
+      (h) => h.id == id,
+      orElse: () => Habit(
+        id: 'all',
+        name: 'Unknown',
+        iconName: '',
+        iconColorHex: '',
+        markerIcon: '',
+        markerColorHex: '',
+      ),
+    );
+    return habit.name;
   }
 
   List<FlSpot> _buildLineChartData(HabitStatsProvider habitStats, String habitId) {
-    // Compute weekly completions since start
-    DateTime today = DateTime.now();
-    int weeksToShow = 12;
+    final today = DateTime.now();
+    const weeksToShow = 12;
+    final startDate = habitStats.getHabitStartDate(habitId) ?? 
+                      today.subtract(Duration(days: weeksToShow * 7)); 
 
-    DateTime startDate = habitStats.getHabitStartDate(habitId) ?? today.subtract(Duration(days: 7 * weeksToShow));
-
-    List<FlSpot> spots = [];
-
+    final spots = <FlSpot>[];
     for (int i = 0; i < weeksToShow; i++) {
-      DateTime weekStart = startDate.add(Duration(days: i * 7));
-      int completionCount = habitStats.completionsInWeek(habitId, weekStart);
-      spots.add(FlSpot(i.toDouble(), completionCount.toDouble()));
+      final weekStart = startDate.add(Duration(days: i * 7));
+      final completions = habitStats.completionsInWeek(habitId, weekStart);
+      spots.add(FlSpot(i.toDouble(), completions.toDouble()));
     }
-
     return spots;
   }
 
@@ -57,26 +60,25 @@ class _StatsScreenState extends State<StatsScreen> {
     if (_selectedHabitId == 'all') {
       final totalHabits = _habits.length;
 
-      List<int> completedHabitCountByDay = List.generate(7, (i) {
+      final completedHabitCountByDay = List<int>.generate(7, (i) {
         final day = today.subtract(Duration(days: today.weekday - 1 - i));
         int completedCount = 0;
-        for (final h in _habits) {
-          if (habitStats.isHabitDone(h.id, day)) completedCount++;
+        for (final habit in _habits) {
+          if (habitStats.isHabitDone(habit.id, day)) completedCount++;
         }
         return completedCount;
       });
 
-      List<_HabitProgress> habitProgressList = _habits.map((h) {
-        int daysDone = 0;
+      final habitProgressList = _habits.map((habit) {
+        int daysCompleted = 0;
         for (int i = 0; i < 7; i++) {
           final day = today.subtract(Duration(days: today.weekday - 1 - i));
-          if (habitStats.isHabitDone(h.id, day)) daysDone++;
+          if (habitStats.isHabitDone(habit.id, day)) daysCompleted++;
         }
-        double percent = (daysDone / 7) * 100;
-        return _HabitProgress(habit: h, percent: percent, completedDays: daysDone);
-      }).toList();
-
-      habitProgressList.sort((a,b) => b.percent.compareTo(a.percent));
+        final percent = (daysCompleted / 7) * 100;
+        return _HabitProgress(habit: habit, percent: percent, completedDays: daysCompleted);
+      }).toList()
+      ..sort((a, b) => b.percent.compareTo(a.percent));
 
       return Scaffold(
         appBar: AppBar(title: const Text('Stats - All Habits')),
@@ -102,24 +104,23 @@ class _StatsScreenState extends State<StatsScreen> {
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  getTitlesWidget: (value, meta) {
+                                  getTitlesWidget: (value, _) {
                                     const labels = ['M','T','W','T','F','S','S'];
-                                    int idx = value.toInt();
-                                    if (idx >= 0 && idx < labels.length) {
-                                      return Text(labels[idx], style: const TextStyle(fontWeight: FontWeight.bold));
+                                    if (value >= 0 && value < labels.length) {
+                                      return Text(labels[value.toInt()], style: const TextStyle(fontWeight: FontWeight.bold));
                                     }
                                     return const SizedBox.shrink();
-                                  }
-                                )
+                                  },
+                                ),
                               ),
                               leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, interval: 1)),
-                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             ),
                             gridData: FlGridData(show: true),
                             borderData: FlBorderData(show: false),
-                            barGroups: List.generate(7, (i) {
-                              return BarChartGroupData(
+                            barGroups: List.generate(7, (i) =>
+                              BarChartGroupData(
                                 x: i,
                                 barRods: [
                                   BarChartRodData(
@@ -128,10 +129,10 @@ class _StatsScreenState extends State<StatsScreen> {
                                     width: 16,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                ]
-                              );
-                            }),
-                          )
+                                ],
+                              )
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -149,8 +150,8 @@ class _StatsScreenState extends State<StatsScreen> {
                         Expanded(
                           child: ListView.builder(
                             itemCount: habitProgressList.length,
-                            itemBuilder: (ctx, i) {
-                              final hp = habitProgressList[i];
+                            itemBuilder: (context, index) {
+                              final hp = habitProgressList[index];
                               return ListTile(
                                 title: Text(hp.habit.name),
                                 subtitle: LinearProgressIndicator(
@@ -160,9 +161,9 @@ class _StatsScreenState extends State<StatsScreen> {
                                 ),
                                 trailing: Text('${hp.percent.toStringAsFixed(0)}% (${hp.completedDays}/7)'),
                               );
-                            }
+                            },
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -173,7 +174,7 @@ class _StatsScreenState extends State<StatsScreen> {
         ),
       );
     } else {
-      Habit? habit = habitProvider.getHabitById(_selectedHabitId);
+      final Habit? habit = habitProvider.getHabitById(_selectedHabitId);
       if (habit == null) {
         return const Scaffold(body: Center(child: Text('Habit not found')));
       }
@@ -183,7 +184,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
       final achievements = habit.achievements ?? [];
       achievements.sort((a,b) => a.days.compareTo(b.days));
-      Achievement? nextMilestone = achievements.firstWhere(
+      final nextMilestone = achievements.firstWhere(
         (a) => !a.achieved,
         orElse: () => achievements.isNotEmpty ? achievements.last : null
       );
@@ -195,22 +196,21 @@ class _StatsScreenState extends State<StatsScreen> {
         progressPercent = (currentStreak / nextMilestone.days).clamp(0.0, 1.0);
       }
 
-      List<bool> currentWeekCompletion = List.generate(7, (i) {
-        final day = today.subtract(Duration(days: today.weekday - 1 - i));
+      final currentWeekCompletion = List<bool>.generate(7, (i) {
+        final day = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1 - i));
         return habitStats.isHabitDone(_selectedHabitId, day);
       });
 
-      List<Widget> milestoneWidgets = achievements.map((a) {
-        double percentDone = (currentStreak / a.days).clamp(0.0, 1.0);
+      final milestoneWidgets = achievements.map((a) {
+        final percentDone = (currentStreak / a.days).clamp(0.0, 1.0);
         return ListTile(
           title: Text(a.label ?? '${a.days} Days'),
           subtitle: LinearProgressIndicator(value: percentDone, color: Colors.deepPurple, backgroundColor: Colors.grey[200]),
-          trailing: Text('${(percentDone*100).toStringAsFixed(0)}%'),
+          trailing: Text('${(percentDone * 100).toStringAsFixed(0)}%'),
         );
       }).toList();
 
-      // Generate data for line chart from actual habit completions per week
-      List<FlSpot> lineSpots = _buildLineChartData(habitStats, _selectedHabitId);
+      final lineSpots = _buildLineChartData(habitStats, _selectedHabitId);
 
       return Scaffold(
         appBar: AppBar(title: Text('Stats - ${habit.name}')),
@@ -228,7 +228,7 @@ class _StatsScreenState extends State<StatsScreen> {
               Card(
                 margin: const EdgeInsets.symmetric(vertical: 16),
                 child: Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -283,7 +283,8 @@ class _StatsScreenState extends State<StatsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Overall Progress (weeks)', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 200,
+                      SizedBox(
+                        height: 200,
                         child: LineChart(
                           LineChartData(
                             gridData: FlGridData(show: true),
