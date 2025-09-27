@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../providers/settings_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,20 +11,31 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
-
-  // Placeholder methods for import/export
-  void _importData() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data Imported')));
-  }
-
-  void _exportData() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data Exported')));
-  }
-
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
+    Future<void> onNotificationToggle(bool value) async {
+      if (value) {
+        // Request notification permission
+        final permissionStatus = await Permission.notification.request();
+        if (!permissionStatus.isGranted) {
+          // Show snackbar or dialog to inform user notifications are denied
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Notification permission denied')),
+          );
+          return;
+        }
+      }
+      // Update provider toggle value
+      settings.setNotificationsEnabled(value);
+      // TODO: Update notification scheduling as needed here
+    }
+
+    void onDarkModeToggle(bool value) {
+      settings.setDarkModeEnabled(value);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -33,22 +47,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Text('App Preference', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text('Notifications'),
-            value: _notificationsEnabled,
-            onChanged: (val) {
-              setState(() {
-                _notificationsEnabled = val;
-              });
-            },
+            value: settings.notificationsEnabled,
+            onChanged: onNotificationToggle,
             secondary: const Icon(Icons.notifications),
           ),
           SwitchListTile(
             title: const Text('Dark Mode'),
-            value: _darkModeEnabled,
-            onChanged: (val) {
-              setState(() {
-                _darkModeEnabled = val;
-              });
-            },
+            value: settings.darkModeEnabled,
+            onChanged: onDarkModeToggle,
             secondary: const Icon(Icons.dark_mode),
           ),
           const SizedBox(height: 24),
@@ -57,13 +63,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.download),
             title: const Text('Import Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: _importData,
+            onTap: () {
+              // TODO: Launch file picker for import
+            },
           ),
           ListTile(
             leading: const Icon(Icons.upload),
             title: const Text('Export Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: _exportData,
+            onTap: () {
+              // TODO: Launch file picker for export location selection and save data
+            },
           ),
           const SizedBox(height: 24),
           const Text('App Info', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
