@@ -1,8 +1,8 @@
-import '../models/habit.dart';
-import '../models/achievement.dart';
+import '../models/habit.dart' as habit_model;
+import '../models/achievement.dart' as achievement_model;
 
-final mockHabits = [
-  Habit(
+final List<habit_model.Habit> mockHabits = [
+  habit_model.Habit(
     id: 'h1',
     name: 'Running',
     iconName: 'running',
@@ -12,7 +12,7 @@ final mockHabits = [
     reminderTime: DateTime.now(),
     targetDays: 30,
   ),
-  Habit(
+  habit_model.Habit(
     id: 'h2',
     name: 'Meditation',
     iconName: 'meditation',
@@ -22,7 +22,7 @@ final mockHabits = [
     reminderTime: DateTime.now(),
     targetDays: 60,
   ),
-  Habit(
+  habit_model.Habit(
     id: 'h3',
     name: 'Read',
     iconName: 'reading',
@@ -34,9 +34,13 @@ final mockHabits = [
   ),
 ];
 
-final mockAchievements = [
-  Achievement(id: 'a1', habitId: 'h1', title: '3 Days Streak', requiredStreak: 3, points: 5, achieved: true),
-  Achievement(id: 'a2', habitId: 'h1', title: '7 Days Streak', requiredStreak: 7, points: 10),
-  Achievement(id: 'a3', habitId: 'h2', title: '3 Days Streak', requiredStreak: 3, points: 5),
-  Achievement(id: 'a4', habitId: 'h3', title: '3 Days Streak', requiredStreak: 3, points: 5, achieved: true),
+final List<achievement_model.Achievement> mockAchievements = [
+  achievement_model.Achievement(
+      id: 'a1', habitId: 'h1', title: '3 Days Streak', requiredStreak: 3, points: 5, achieved: true),
+  achievement_model.Achievement(
+      id: 'a2', habitId: 'h1', title: '7 Days Streak', requiredStreak: 7, points: 10),
+  achievement_model.Achievement(
+      id: 'a3', habitId: 'h2', title: '3 Days Streak', requiredStreak: 3, points: 5),
+  achievement_model.Achievement(
+      id: 'a4', habitId: 'h3', title: '3 Days Streak', requiredStreak: 3, points: 5, achieved: true),
 ];
