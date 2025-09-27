@@ -4,7 +4,11 @@ class FloatingNavbar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const FloatingNavbar({super.key, required this.currentIndex, required this.onTap});
+  const FloatingNavbar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
