@@ -25,10 +25,12 @@ class HabitProvider extends ChangeNotifier {
         _habits = jsonList
             .map((json) => Habit.fromJson(json as Map<String, dynamic>))
             .toList();
-        // Initialize achievements for habits if they are null
+        // Initialize achievements with custom target if missing
         for (int i = 0; i < _habits.length; i++) {
           if (_habits[i].achievements == null) {
-            _habits[i] = _habits[i].copyWith(achievements: _initDefaultAchievements());
+            _habits[i] = _habits[i].copyWith(
+              achievements: _initDefaultAchievements(_habits[i].targetDays),
+            );
           }
         }
       } catch (e) {
@@ -45,9 +47,12 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> addHabit(Habit habit) async {
-    // Initialize achievements if not provided
-    Habit habitWithAchievements =
-        habit.achievements == null ? habit.copyWith(achievements: _initDefaultAchievements()) : habit;
+    Habit habitWithAchievements = habit;
+    if (habit.achievements == null) {
+      habitWithAchievements = habit.copyWith(
+        achievements: _initDefaultAchievements(habit.targetDays),
+      );
+    }
     _habits.add(habitWithAchievements);
     await _saveHabits();
     notifyListeners();
@@ -56,11 +61,13 @@ class HabitProvider extends ChangeNotifier {
   Future<void> updateHabit(Habit habit) async {
     int index = _habits.indexWhere((h) => h.id == habit.id);
     if (index >= 0) {
-      // Ensure achievements present
-      Habit habitWithAchievements = habit.achievements == null
-          ? habit.copyWith(achievements: _initDefaultAchievements())
-          : habit;
-      _habits[index] = habitWithAchievements;
+      Habit updatedHabit = habit;
+      if (habit.achievements == null) {
+        updatedHabit = habit.copyWith(
+          achievements: _initDefaultAchievements(habit.targetDays),
+        );
+      }
+      _habits[index] = updatedHabit;
       await _saveHabits();
       notifyListeners();
     }
@@ -70,45 +77,35 @@ class HabitProvider extends ChangeNotifier {
     _habits.removeWhere((h) => h.id == id);
     _habitCompletedToday.remove(id);
     await _saveHabits();
-    await _saveHabitCompletedToday();
+    await _saveHabitToday();
     notifyListeners();
   }
 
-  Habit? getHabitById(String id) {
-    try {
-      return _habits.firstWhere((h) => h.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<void> _loadHabitCompletedToday() async {
+  Future<void> _loadHabitToday() async {
     final jsonString = await LocalStorage().getString('habitCompletedToday');
     if (jsonString != null) {
       try {
-        final Map<String, dynamic> map = jsonDecode(jsonString);
-        _habitCompletedToday = map.map((k, v) => MapEntry(k, v as bool));
-      } catch (_) {
+        final map = jsonDecode(jsonString);
+        _habitCompletedToday = Map<String, bool>.from(map);
+      } catch (e) {
         _habitCompletedToday = {};
       }
     }
     notifyListeners();
   }
 
-  Future<void> _saveHabitCompletedToday() async {
+  Future<void> _saveHabitToday() async {
     await LocalStorage().saveString('habitCompletedToday', jsonEncode(_habitCompletedToday));
   }
 
   void toggleHabitCompleted(String id) {
     bool current = _habitCompletedToday[id] ?? false;
     _habitCompletedToday[id] = !current;
-    _saveHabitCompletedToday();
+    _saveHabitToday();
     notifyListeners();
 
-    // Notify stats provider about completion toggle
     statsProvider.markHabitDone(id, DateTime.now(), !current);
 
-    // Unlock achievements if conditions met
     Habit? habit = getHabitById(id);
     if (habit != null && habit.achievements != null) {
       bool updated = false;
@@ -140,42 +137,38 @@ class HabitProvider extends ChangeNotifier {
     return _habitCompletedToday[id] ?? false;
   }
 
-  List<Achievement> _initDefaultAchievements([int? customTarget]) {
-  List<Achievement> milestones = [
-    Achievement(days: 3, points: 5, achieved: false, medalIconAsset: 'assets/icons/medal_3_days.png'),
-    Achievement(days: 7, points: 10, achieved: false, medalIconAsset: 'assets/icons/medal_7_days.png'),
-    Achievement(days: 15, points: 15, achieved: false, medalIconAsset: 'assets/icons/medal_15_days.png'),
-    Achievement(days: 30, points: 20, achieved: false, medalIconAsset: 'assets/icons/medal_30_days.png'),
-    Achievement(days: 60, points: 30, achieved: false, medalIconAsset: 'assets/icons/medal_60_days.png'),
-    Achievement(days: 90, points: 50, achieved: false, medalIconAsset: 'assets/icons/medal_90_days.png'),
-    Achievement(days: 180, points: 75, achieved: false, medalIconAsset: 'assets/icons/medal_180_days.png'),
-    Achievement(days: 365, points: 100, achieved: false, medalIconAsset: 'assets/icons/medal_365_days.png'),
-  ];
+  List<Achievement> _initDefaultAchievements(int? customTarget) {
+    List<Achievement> milestones = [
+      Achievement(days: 3, points: 5, achieved: false, medalIcon: 'assets/icons/medal_3_days.png'),
+      Achievement(days: 7, points: 10, achieved: false, medalIcon: 'assets/icons/medal_7_days.png'),
+      Achievement(days: 15, points: 15, achieved: false, medalIcon: 'assets/icons/medal_15_days.png'),
+      Achievement(days: 30, points: 20, achieved: false, medalIcon: 'assets/icons/medal_30_days.png'),
+      Achievement(days: 60, points: 30, achieved: false, medalIcon: 'assets/icons/medal_60_days.png'),
+      Achievement(days: 90, points: 50, achieved: false, medalIcon: 'assets/icons/medal_90_days.png'),
+      Achievement(days: 180, points: 75, achieved: false, medalIcon: 'assets/icons/medal_180_days.png'),
+      Achievement(days: 365, points: 100, achieved: false, medalIcon: 'assets/icons/medal_365_days.png'),
+    ];
 
-  if (customTarget != null && customTarget > 0) {
-    milestones.add(
-      Achievement(days: customTarget, points: 0, achieved: false, label: 'Custom Target', medalIconAsset: 'assets/icons/medal_custom_days.png'),
-    );
-  } else {
-    // Default custom target place holder event
-    milestones.add(
-      Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Set Target', medalIconAsset: 'assets/icons/medal_custom_days.png'),
-    );
+    if (customTarget != null && customTarget > 0) {
+      milestones.add(
+        Achievement(days: customTarget, points: 0, achieved: false, label: 'Custom Target', medalIcon: 'assets/icons/medal_custom_days.png'),
+      );
+    } else {
+      milestones.add(
+        Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Target Placeholder', medalIcon: 'assets/icons/medal_custom_days.png'),
+      );
+    }
+
+    return milestones;
   }
-
-  return milestones;
-}
-
 
   Future<void> importHabits(List<Habit> importedHabits) async {
     _habits = importedHabits;
-    // You may want to reset or sync statsProvider here
     await _saveHabits();
     notifyListeners();
   }
 
-  String generateExportJson() {
-    List<Map<String, dynamic>> jsonList = _habits.map((h) => h.toJson()).toList();
-    return jsonEncode(jsonList);
+  String generateJsonExport() {
+    return jsonEncode(_habits.map((h) => h.toJson()).toList());
   }
 }
