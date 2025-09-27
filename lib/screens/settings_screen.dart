@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/habit_provider.dart';
+import '../services/data_service.dart'; // Your import/export helper service
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -17,6 +19,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
+    final habitProvider = context.read<HabitProvider>();
+    final dataService = DataService(habitProvider, settings);
 
     Future<void> onNotificationToggle(bool value) async {
       if (value) {
@@ -43,10 +47,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
         if (result != null && result.files.single.path != null) {
           final file = File(result.files.single.path!);
-          final content = await file.readAsString();
-          // TODO: parse content and update provider / app state
+          await dataService.importFromFile(file);
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Imported: ${file.path}')));
+              SnackBar(content: Text('Imported data from: ${file.path}')));
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -56,7 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     Future<void> onExportData() async {
       try {
-        // Request storage permissions
         final status = await Permission.storage.request();
         if (!status.isGranted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -66,9 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         String? selectedDir = await FilePicker.platform.getDirectoryPath();
         if (selectedDir != null) {
-          // TODO: get data JSON from provider or app state
-          final dataJson = '{"example":"exported data"}';
-
+          final dataJson = dataService.prepareExportJson();
           final file = File('$selectedDir/habits_export_${DateTime.now().millisecondsSinceEpoch}.json');
           await file.writeAsString(dataJson);
           ScaffoldMessenger.of(context).showSnackBar(
