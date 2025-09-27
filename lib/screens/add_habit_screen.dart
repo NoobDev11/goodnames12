@@ -25,7 +25,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.spa_rounded,
     Icons.bolt_rounded,
     Icons.menu_book_rounded,
-    Icons.fitness_center_rounded,
+    Icons.fitness_center,
     Icons.music_note,
     Icons.local_drink,
     Icons.bedtime,
@@ -50,7 +50,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6a4b9d',
+    '#6b4b99',
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -62,10 +62,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.check_circle,
     Icons.arrow_circle_up,
     Icons.arrow_circle_down,
-    Icons.build_circle,
+    Icons.build,
     Icons.pause_circle_filled,
     Icons.play_circle_filled,
-    Icons.swap_horizontal_circle,
+    Icons.swap_horizontal,
     Icons.close,
     Icons.circle,
     Icons.star,
@@ -78,10 +78,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.check_circle: Colors.green,
     Icons.arrow_circle_up: Colors.blue,
     Icons.arrow_circle_down: Colors.blue,
-    Icons.build_circle: Colors.orange,
+    Icons.build: Colors.orange,
     Icons.pause_circle_filled: Colors.yellow,
     Icons.play_circle_filled: Colors.green,
-    Icons.swap_horizontal_circle: Colors.teal,
+    Icons.swap_horizontal: Colors.teal,
     Icons.close: Colors.amber,
     Icons.circle: Colors.green,
     Icons.star: Colors.teal,
@@ -90,13 +90,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.card_giftcard: Colors.orange,
   };
 
-  void _disposeTextEditingControllers() {
-    _habitNameController.dispose();
-  }
-
   @override
   void dispose() {
-    _disposeTextEditingControllers();
+    _habitNameController.dispose();
     super.dispose();
   }
 
@@ -109,54 +105,50 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-  final r = (color.r * 255).round() & 0xFF;
-  final g = (color.g * 255).round() & 0xFF;
-  final b = (color.b * 255).round() & 0xFF;
-  return '#'
-      '${r.toRadixString(16).padLeft(2, '0')}'
-      '${g.toRadixString(16).padLeft(2, '0')}'
-      '${b.toRadixString(16).padLeft(2, '0')}';
-}
-
-
+    final r = color.red;
+    final g = color.green;
+    final b = color.blue;
+    return '#${r.toRadixString(16).padLeft(2, '0')}'
+        '${g.toRadixString(16).padLeft(2, '0')}'
+        '${b.toRadixString(16).padLeft(2, '0')}';
+  }
 
   void _onAddHabit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      DateTime? reminderDateTime;
-      if (_reminderTime != null) {
-        final now = DateTime.now();
-        reminderDateTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          _reminderTime!.hour,
-          _reminderTime!.minute,
-        );
-      }
+    if (!_formKey.currentState!.validate()) return;
 
-      final Color markerColor =
-          _markerColors[_selectedMarker] ?? _markerColors[_customMarkers[0]]!;
-
-      final newHabit = Habit(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _habitNameController.text.trim(),
-        reminderTime: reminderDateTime,
-        targetDays: int.tryParse(_targetDays ?? '') ?? 0,
-        iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
-        iconColorHex: _selectedColor ?? _iconColors[0],
-        markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
-        markerColorHex: colorToHex(markerColor),
+    DateTime? reminderDateTime;
+    if (_reminderTime != null) {
+      final now = DateTime.now();
+      reminderDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        _reminderTime!.hour,
+        _reminderTime!.minute,
       );
-
-      final habitProvider = context.read<HabitProvider>();
-      habitProvider.addHabit(newHabit);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Habit Added Successfully!')),
-      );
-
-      Navigator.pop(context);
     }
+
+    final Color markerColor =
+        _markerColors[_selectedMarker ?? _customMarkers[0]] ?? Colors.grey;
+
+    final newHabit = Habit(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: _habitNameController.text.trim(),
+      reminderTime: reminderDateTime,
+      targetDays: int.tryParse(_targetDays ?? '') ?? 0,
+      iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
+      iconColor: _selectedColor ?? _iconColors[0],
+      markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
+      markerColorHex: colorToHex(markerColor),
+    );
+
+    final habitProvider = context.read<HabitProvider>();
+    habitProvider.addHabit(newHabit);
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Habit added!')));
+
+    Navigator.of(context).pop();
   }
 
   Color _colorFromHex(String hex) {
@@ -174,184 +166,208 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          tooltip: 'Close Add Habit Screen',
-          onPressed: () => Navigator.pop(context),
+          tooltip: 'Close',
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              Semantics(
-                label: 'Habit name input field',
-                hint: 'Enter the habit name',
-                child: TextFormField(
-                  controller: _habitNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Add Habit Name',
-                    hintText: 'e.g. read journal',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.edit),
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (val) =>
-                      val == null || val.isEmpty ? 'Name required' : null,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      label: 'Reminder time picker',
-                      hint: 'Tap to select a reminder time',
-                      child: InkWell(
-                        onTap: _selectReminderTime,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Set Reminder',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.alarm),
-                          ),
-                          child: Text(
-                            _reminderTime == null
-                                ? 'Optional'
-                                : _reminderTime!.format(context),
-                          ),
-                        ),
-                      ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    const Text(
+                      'Habit Name',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Semantics(
-                      label: 'Target days input',
-                      hint: 'Enter target streak days',
-                      child: TextFormField(
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _habitNameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter habit name',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (val) =>
+                          val == null || val.trim().isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Set Target',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter target days',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) => _targetDays = val,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Set Reminder',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: _selectReminderTime,
+                      child: InputDecorator(
                         decoration: const InputDecoration(
-                          labelText: 'Set Target',
-                          hintText: 'e.g. 3 days',
                           border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.flag),
+                          prefixIcon: Icon(Icons.alarm),
                         ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (val) => _targetDays = val,
+                        child: Text(
+                          _reminderTime == null
+                              ? 'No reminder set'
+                              : _reminderTime!.format(context),
+                          style: TextStyle(
+                              color: _reminderTime == null
+                                  ? Colors.grey
+                                  : Colors.black),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Text('Choose Icon'),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 56,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _habitIcons.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final icon = _habitIcons[index];
-                    final isSelected = _selectedIcon == icon;
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedIcon = icon;
-                      }),
-                      child: CircleAvatar(
-                        backgroundColor:
-                            isSelected ? Colors.deepPurple : Colors.grey[300],
-                        child: Icon(
-                          icon,
-                          color: isSelected ? Colors.white : Colors.black45,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Select Color'),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _iconColors.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 6),
-                  itemBuilder: (context, index) {
-                    final hex = _iconColors[index];
-                    final isSelected = _selectedColor == hex;
-                    final color = _colorFromHex(hex);
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedColor = hex;
-                      }),
-                      child: CircleAvatar(
-                        backgroundColor: color,
-                        child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white)
-                            : null,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Select Marker'),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _customMarkers.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final marker = _customMarkers[index];
-                    final isSelected = _selectedMarker == marker;
-                    final markerColor = _markerColors[marker] ?? Colors.grey;
-                    return GestureDetector(
-                      onTap: () => setState(() {
-                        _selectedMarker = marker;
-                      }),
-                      child: Container(
+                    const SizedBox(height: 16),
+                    Card(
+                      elevation: 2,
+                      child: Padding(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? markerColor : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          marker,
-                          color: isSelected ? Colors.white : Colors.black45,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Select Habit Icon',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18)),
+                            const SizedBox(height: 8),
+                            GridView.count(
+                              crossAxisCount: 6,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              children: _habitIcons
+                                  .map((icon) => GestureDetector(
+                                        onTap: () =>
+                                            setState(() => _selectedIcon = icon),
+                                        child: CircleAvatar(
+                                          backgroundColor: _selectedIcon ==
+                                                  icon
+                                              ? Colors.deepPurple
+                                              : Colors.grey[300],
+                                          child: Icon(icon,
+                                              color: _selectedIcon == icon
+                                                  ? Colors.white
+                                                  : Colors.black54),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Select Color',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18)),
+                            const SizedBox(height: 8),
+                            GridView.count(
+                              crossAxisCount: 6,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              children: _iconColors
+                                  .map((hex) => GestureDetector(
+                                        onTap: () =>
+                                            setState(() => _selectedColor = hex),
+                                        child: CircleAvatar(
+                                          backgroundColor:
+                                              _colorFromHex(hex),
+                                          child: _selectedColor == hex
+                                              ? const Icon(Icons.check,
+                                                  color: Colors.white)
+                                              : null,
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Select Custom Marker',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18)),
+                            const SizedBox(height: 8),
+                            GridView.count(
+                              crossAxisCount: 6,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              children: _customMarkers
+                                  .map((marker) => GestureDetector(
+                                        onTap: () => setState(
+                                            () => _selectedMarker = marker),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                _selectedMarker == marker
+                                                    ? _markerColors[
+                                                        marker] ?? Colors.grey
+                                                    : Colors.grey[300],
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(marker,
+                                              color: _selectedMarker == marker
+                                                  ? Colors.white
+                                                  : Colors.black54),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 30),
-              Row(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    height: 40,
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 50,
                     child: ElevatedButton(
                       onPressed: _onAddHabit,
                       child: const Text('Add Habit'),
                     ),
                   ),
+                  const SizedBox(height: 12),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
