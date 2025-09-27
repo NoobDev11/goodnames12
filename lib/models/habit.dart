@@ -9,6 +9,9 @@ class Habit {
   final int? targetDays; // optional target streak
   final bool notificationsEnabled;
 
+  // Optional achievements list for each habit
+  // final List<Achievement>? achievements;
+
   Habit({
     required this.id,
     required this.name,
@@ -19,6 +22,7 @@ class Habit {
     this.reminderTime,
     this.targetDays,
     this.notificationsEnabled = true,
+    // this.achievements,
   });
 
   Habit copyWith({
@@ -31,6 +35,7 @@ class Habit {
     DateTime? reminderTime,
     int? targetDays,
     bool? notificationsEnabled,
+    // List<Achievement>? achievements,
   }) {
     return Habit(
       id: id ?? this.id,
@@ -42,6 +47,7 @@ class Habit {
       reminderTime: reminderTime ?? this.reminderTime,
       targetDays: targetDays ?? this.targetDays,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      // achievements: achievements ?? this.achievements,
     );
   }
 
@@ -58,6 +64,9 @@ class Habit {
           : null,
       targetDays: json['targetDays'] != null ? json['targetDays'] as int : null,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      // achievements: (json['achievements'] as List<dynamic>?)
+      //     ?.map((a) => Achievement.fromJson(a as Map<String, dynamic>))
+      //     .toList(),
     );
   }
 
@@ -72,6 +81,7 @@ class Habit {
       'reminderTime': reminderTime?.toIso8601String(),
       'targetDays': targetDays,
       'notificationsEnabled': notificationsEnabled,
+      // 'achievements': achievements?.map((a) => a.toJson()).toList(),
     };
   }
 }
