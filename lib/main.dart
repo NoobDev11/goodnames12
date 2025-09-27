@@ -7,7 +7,7 @@ import 'providers/settings_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await NotificationService().init();
   runApp(
     MultiProvider(
       providers: [
