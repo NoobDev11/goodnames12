@@ -4,6 +4,7 @@ import 'app.dart';
 import 'providers/habit_provider.dart';
 import 'providers/habit_stats_provider.dart';
 import 'providers/settings_provider.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
