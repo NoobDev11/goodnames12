@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_provider.dart';
+import '../models/habit.dart';
 
 class AchievementScreen extends StatefulWidget {
   const AchievementScreen({super.key});
@@ -9,34 +12,7 @@ class AchievementScreen extends StatefulWidget {
 
 class _AchievementScreenState extends State<AchievementScreen>
     with SingleTickerProviderStateMixin {
-  String _selectedHabit = 'Meditation';
-
-  final List<String> _habits = ['Meditation', 'Running', 'Read'];
-
-  final Map<String, List<Map<String, dynamic>>> _achievements = {
-    'Meditation': [
-      {'days': 3, 'points': 5, 'achieved': true},
-      {'days': 7, 'points': 10, 'achieved': true},
-      {'days': 15, 'points': 15, 'achieved': false},
-      {'days': 30, 'points': 20, 'achieved': false},
-      {'days': 60, 'points': 30, 'achieved': false},
-      {'days': 90, 'points': 50, 'achieved': false},
-      {'days': 180, 'points': 75, 'achieved': false},
-      {'days': 365, 'points': 100, 'achieved': false},
-      {'days': 9999, 'points': 150, 'achieved': false, 'label': 'Custom'},
-    ],
-    'Running': [
-      {'days': 3, 'points': 5, 'achieved': true},
-      {'days': 7, 'points': 10, 'achieved': true},
-      {'days': 15, 'points': 15, 'achieved': true},
-      {'days': 30, 'points': 20, 'achieved': false},
-    ],
-    'Read': [
-      {'days': 3, 'points': 5, 'achieved': true},
-      {'days': 7, 'points': 10, 'achieved': false},
-      {'days': 15, 'points': 15, 'achieved': false},
-    ],
-  };
+  String? _selectedHabitId;
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -48,6 +24,9 @@ class _AchievementScreenState extends State<AchievementScreen>
         AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
+
+    final habits = context.read<HabitProvider>().habits;
+    _selectedHabitId = habits.isNotEmpty ? habits.first.id : null;
   }
 
   @override
@@ -56,29 +35,40 @@ class _AchievementScreenState extends State<AchievementScreen>
     super.dispose();
   }
 
-  int get totalPoints {
-    final achievementList = _achievements[_selectedHabit];
-    if (achievementList == null) return 0;
-    return achievementList
-        .where((e) => e['achieved'] == true)
-        .fold(0, (sum, e) => sum + (e['points'] as int));
+  List<Achievement> _getAchievementsForHabit(Habit habit) {
+    // Replace with actual achievements list for habit
+    // If habit has `achievements` property this is direct.
+    // Else fetch from provider related to milestones
+    return habit.achievements ?? [];
   }
 
-  int get medalsEarned {
-    return _achievements[_selectedHabit]
-            ?.where((e) => e['achieved'] == true)
-            .length ??
-        0;
+  int _calculateTotalPoints(List<Achievement> achievements) {
+    return achievements.where((a) => a.achieved).fold(0, (sum, a) => sum + a.points);
+  }
+
+  int _calculateMedalsEarned(List<Achievement> achievements) {
+    return achievements.where((a) => a.achieved).length;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> habitAchievements =
-        _achievements[_selectedHabit] ?? [];
+    final habitProvider = context.watch<HabitProvider>();
+    final habits = habitProvider.habits;
+    final habit = habits.firstWhere((h) => h.id == _selectedHabitId, orElse: () => habits.isNotEmpty ? habits.first : null);
+
+    if (habit == null) {
+      return const Scaffold(
+        body: Center(child: Text('No habits found')),
+      );
+    }
+
+    final habitAchievements = _getAchievementsForHabit(habit);
+    final totalPoints = _calculateTotalPoints(habitAchievements);
+    final medalsEarned = _calculateMedalsEarned(habitAchievements);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medals'),
+        title: const Text('Achievements'),
         centerTitle: true,
       ),
       body: Column(
@@ -114,7 +104,7 @@ class _AchievementScreenState extends State<AchievementScreen>
                       ),
                       const Text('Medals Earned'),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -124,15 +114,15 @@ class _AchievementScreenState extends State<AchievementScreen>
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _habits.length,
+              itemCount: habits.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                String habit = _habits[index];
-                bool isSelected = habit == _selectedHabit;
+                Habit h = habits[index];
+                bool isSelected = h.id == _selectedHabitId;
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedHabit = habit;
+                      _selectedHabitId = h.id;
                       _controller.reset();
                       _controller.forward();
                     });
@@ -146,7 +136,7 @@ class _AchievementScreenState extends State<AchievementScreen>
                     ),
                     child: Center(
                       child: Text(
-                        habit,
+                        h.name,
                         style: TextStyle(
                             color: isSelected ? Colors.white : Colors.black87),
                       ),
@@ -167,10 +157,9 @@ class _AchievementScreenState extends State<AchievementScreen>
                     crossAxisCount: 3, mainAxisSpacing: 12, crossAxisSpacing: 12),
                 itemBuilder: (ctx, idx) {
                   final achievement = habitAchievements[idx];
-                  final isAchieved = achievement['achieved'] ?? false;
-                  final days = achievement['days'];
-                  final points = achievement['points'];
-                  final label = achievement['label'] ?? '$days Days';
+                  final isAchieved = achievement.achieved;
+                  final label = achievement.label ?? '${achievement.days} Days';
+                  final points = achievement.points;
 
                   return Semantics(
                     label: 'Achievement: $label, $points points',
