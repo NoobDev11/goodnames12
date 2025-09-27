@@ -4,6 +4,12 @@ import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 import '../widgets/floating_navbar.dart';
 
+// Import your actual screen widgets here
+import '../screens/calendar_screen.dart';
+import '../screens/stats_screen.dart';
+import '../screens/achievements_screen.dart';
+import '../screens/settings_screen.dart';
+
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -98,46 +104,6 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-class CalendarScreen extends StatelessWidget {
-  const CalendarScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Calendar')),
-        body: const Center(child: Text('Calendar UI')),
-      );
-}
-
-class StatsScreen extends StatelessWidget {
-  const StatsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Stats')),
-        body: const Center(child: Text('Stats UI')),
-      );
-}
-
-class AchievementScreen extends StatelessWidget {
-  const AchievementScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Achievements')),
-        body: const Center(child: Text('Achievements UI')),
-      );
-}
-
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Settings')),
-        body: const Center(child: Text('Settings UI')),
-      );
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -145,12 +111,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   int _selectedIndex = 0;
-  late final List<Widget> _screens;
+  late List<Widget> _screens;
 
   @override
   void initState() {
@@ -160,11 +127,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       const HomeTab(),
       const CalendarScreen(),
       const StatsScreen(),
-      const AchievementScreen(),
+      const AchievementsScreen(),
       const SettingsScreen(),
     ];
 
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
   }
@@ -175,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _onItemTapped(int index) {
+  void _onTabTapped(int index) {
     setState(() {
       _selectedIndex = index;
       _controller.reset();
@@ -200,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: FloatingNavbar(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: _onTabTapped,
       ),
     );
   }
