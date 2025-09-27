@@ -50,7 +50,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6b4b99',
+    '#6b4a99', // fixed typo from previous e.g. 6b4b99
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -59,34 +59,32 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   ];
 
   final List<IconData> _customMarkers = [
-    Icons.check_circle,
-    Icons.arrow_circle_up,
-    Icons.arrow_circle_down,
-    Icons.build,
-    Icons.pause_circle_filled,
-    Icons.play_circle_filled,
-    Icons.swap_horizontal,
-    Icons.close,
-    Icons.circle,
-    Icons.star,
-    Icons.stars,
-    Icons.diamond,
+    Icons.check_circle_rounded,
+    Icons.arrow_circle_up_rounded,
+    Icons.arrow_circle_down_rounded,
+    Icons.build_circle_rounded,
+    Icons.pause_circle_filled_rounded,
+    Icons.play_circle_filled_rounded,
+    Icons.swap_horizontal_circle_rounded, // corrected icon name here
+    Icons.clear_rounded,
+    Icons.star_rounded,
+    Icons.stars_rounded,
+    Icons.diamond_rounded,
     Icons.card_giftcard,
   ];
 
   final Map<IconData, Color> _markerColors = {
-    Icons.check_circle: Colors.green,
-    Icons.arrow_circle_up: Colors.blue,
-    Icons.arrow_circle_down: Colors.blue,
-    Icons.build: Colors.orange,
-    Icons.pause_circle_filled: Colors.yellow,
-    Icons.play_circle_filled: Colors.green,
-    Icons.swap_horizontal: Colors.teal,
-    Icons.close: Colors.amber,
-    Icons.circle: Colors.green,
-    Icons.star: Colors.teal,
-    Icons.stars: Colors.red,
-    Icons.diamond: Colors.purple,
+    Icons.check_circle_rounded: Colors.green,
+    Icons.arrow_circle_up_rounded: Colors.blue,
+    Icons.arrow_circle_down_rounded: Colors.blue,
+    Icons.build_circle_rounded: Colors.orange,
+    Icons.pause_circle_filled_rounded: Colors.yellow,
+    Icons.play_circle_filled_rounded: Colors.green,
+    Icons.swap_horizontal_circle_rounded: Colors.teal,
+    Icons.clear_rounded: Colors.amber,
+    Icons.star_rounded: Colors.teal,
+    Icons.stars_rounded: Colors.red,
+    Icons.diamond_rounded: Colors.purple,
     Icons.card_giftcard: Colors.orange,
   };
 
@@ -137,7 +135,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       reminderTime: reminderDateTime,
       targetDays: int.tryParse(_targetDays ?? '') ?? 0,
       iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
-      iconColor: _selectedColor ?? _iconColors[0],
+      iconColorHex: _selectedColor ?? _iconColors[0],
       markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
       markerColorHex: colorToHex(markerColor),
     );
@@ -242,7 +240,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Select Habit Icon',
+                            const Text('Select Icon',
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 18)),
@@ -298,7 +296,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                   .toList(),
                             ),
                             const SizedBox(height: 16),
-                            const Text('Select Custom Marker',
+                            const Text('Select Marker',
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 18)),
@@ -341,12 +339,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SizedBox(
-                    height: 40,
+                    height: 50,
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
@@ -354,13 +353,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
-                    height: 50,
+                    height: 60,
                     child: ElevatedButton(
                       onPressed: _onAddHabit,
                       child: const Text('Add Habit'),
                     ),
                   ),
-                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -370,4 +368,3 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     );
   }
 }
-
