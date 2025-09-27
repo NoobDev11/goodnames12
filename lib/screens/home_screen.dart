@@ -86,16 +86,13 @@ class HomeTab extends StatelessWidget {
                 habitProvider.toggleHabitCompleted(habit.id);
               },
               child: isDone
-                  ? Container(
-                      decoration: BoxDecoration(
+                  ? Icon(
+                        markerData,
                         color: markerColor,
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      padding: const EdgeInsets.all(7),
-                      child: Icon(markerData, color: Colors.white, size: 24),
-                    )
+                        size: 28,  // slightly bigger for better visibility
+                  );
                   : const Icon(Icons.radio_button_unchecked,
-                      color: Colors.grey, size: 24),
+                      color: Colors.grey, size: 28),
             ),
           ),
         );
