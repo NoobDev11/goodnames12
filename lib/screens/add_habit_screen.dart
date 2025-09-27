@@ -231,7 +231,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                       hint: 'Enter target streak days',
                       child: TextFormField(
                         decoration: const InputDecoration(
-                          labelText: 'Set Target (days)',
+                          labelText: 'Set Target',
                           hintText: 'e.g. 3 days',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.flag),
