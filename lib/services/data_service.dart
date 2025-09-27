@@ -25,10 +25,14 @@ class DataService {
     return exportJson;
   }
 
-  /// Saves the JSON string to the specified path
-  Future<void> saveExportToFile(String path, String jsonData) async {
+  /// Saves the JSON string to the application's documents directory
+  Future<File> saveExportToFile(String filename, String jsonData) async {
+    // Get the app document directory using path_provider
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/$filename';
     final file = File(path);
     await file.writeAsString(jsonData, flush: true);
+    return file;
   }
 
   /// Loads JSON from file and import data into providers
