@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app.dart';
 import 'providers/habit_provider.dart';
+import 'providers/habit_stats_provider.dart';
 import 'providers/settings_provider.dart';
 
 Future<void> main() async {
@@ -10,7 +11,12 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => HabitProvider()),
+        ChangeNotifierProvider(create: (_) => HabitStatsProvider()),
+        ChangeNotifierProxyProvider<HabitStatsProvider, HabitProvider>(
+          create: (context) => HabitProvider(context.read<HabitStatsProvider>()),
+          update: (context, statsProvider, previous) =>
+              previous ?? HabitProvider(statsProvider),
+        ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: const RootApp(),
