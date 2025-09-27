@@ -5,9 +5,10 @@ import '../data/local_storage.dart';
 import 'habit_stats_provider.dart';
 import '../services/notification_service.dart';  // Adjust path if needed
 
-final NotificationService _notificationService = NotificationService();
+
 
 class HabitProvider extends ChangeNotifier {
+  final NotificationService _notificationService = NotificationService();
   List<Habit> _habits = [];
   Map<String, bool> _habitCompletedToday = {};
 
