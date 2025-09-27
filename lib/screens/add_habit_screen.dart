@@ -25,26 +25,41 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.spa_rounded,
     Icons.bolt_rounded,
     Icons.menu_book_rounded,
-    Icons.fitness_center,
+    Icons.fitness_center_rounded,
     Icons.music_note,
     Icons.local_drink,
-    Icons.bedtime,
+    Icons.bedtime_rounded,
     Icons.emoji_events,
     Icons.emoji_emotions,
     Icons.water_drop,
     Icons.local_fire_department,
     Icons.book,
     Icons.lightbulb,
-    Icons.device_unknown,
+    Icons.apple_rounded,
     Icons.account_balance,
     Icons.account_balance_wallet,
-    Icons.airport_shuttle,
+    Icons.bookmarks_rounded,
   ];
 
   final List<String> _iconColors = [
-    '#ff595e', '#f15152', '#ffca3a', '#f2af29', '#f18f01',
-    '#8ac926', '#086375', '#1982c4', '#6b4a99', '#69b578',
-    '#ff6f91', '#028090', '#a44200', '#950952',
+    '#ff595e',
+    '#f15152',
+    '#ffca3a',
+    '#f2af29',
+    '#f18f01',
+    '#8ac926',
+    '#086375',
+    '#1982c4',
+    '#6b4a99',
+    '#69b578',
+    '#ff6f91',
+    '#028090',
+    '#a44200',
+    '#950952',
+    '#645830',
+    '#da6278',
+    '#f06449',
+    '#907ad6',
   ];
 
   final List<IconData> _customMarkers = [
@@ -60,6 +75,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.stars_rounded,
     Icons.diamond_rounded,
     Icons.card_giftcard,
+    Icons.alternate_email_rounded,
+    Icons.amp_stories_rounded,
+    Icons.anchor_rounded,
+    Icons.assistant_navigation,
+    Icons.auto_awesome_rounded,
+    Icons.block_rounded,
   ];
 
   final Map<IconData, Color> _markerColors = {
@@ -75,6 +96,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.stars_rounded: Colors.red,
     Icons.diamond_rounded: Colors.purple,
     Icons.card_giftcard: Colors.orange,
+    Icons.alternate_email_rounded: Colors.blue,
+    Icons.amp_stories_rounded: Colors.green,
+    Icons.anchor_rounded: Colors.brown,
+    Icons.assistant_navigation: Colors.blue,
+    Icons.auto_awesome_rounded: Colors.blue,
+    Icons.block_rounded: Colors.red,
   };
 
   @override
@@ -92,11 +119,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-    final r = color.red, g = color.green, b = color.blue;
-    return '#${r.toRadixString(16).padLeft(2, '0')}'
-           '${g.toRadixString(16).padLeft(2, '0')}'
-           '${b.toRadixString(16).padLeft(2, '0')}';
-  }
+  final r = (color.r * 255).round() & 0xFF;
+  final g = (color.g * 255).round() & 0xFF;
+  final b = (color.b * 255).round() & 0xFF;
+  return '#'
+      '${r.toRadixString(16).padLeft(2, '0')}'
+      '${g.toRadixString(16).padLeft(2, '0')}'
+      '${b.toRadixString(16).padLeft(2, '0')}';
+}
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) return;
