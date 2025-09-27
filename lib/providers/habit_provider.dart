@@ -198,6 +198,7 @@ class HabitProvider extends ChangeNotifier {
 
   Future<void> importHabits(List<Habit> importedHabits) async {
     _habits = importedHabits;
+    await _saveHabits();
     notifyListeners();
   }
 
