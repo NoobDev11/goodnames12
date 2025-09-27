@@ -7,7 +7,7 @@ import '../widgets/floating_navbar.dart';
 // Import your actual screen widgets here
 import '../screens/calendar_screen.dart';
 import '../screens/stats_screen.dart';
-import '../screens/achievements_screen.dart';
+import '../screens/achievement_screen.dart';
 import '../screens/settings_screen.dart';
 
 class HomeTab extends StatelessWidget {
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen>
       const HomeTab(),
       const CalendarScreen(),
       const StatsScreen(),
-      const AchievementsScreen(),
+      const AchievementScreen(),
       const SettingsScreen(),
     ];
 
