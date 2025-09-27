@@ -16,6 +16,8 @@ dependencies:
   shared_preferences: ^2.1.1
   flutter_local_notifications: ^19.4.2
   permission_handler: ^10.3.0
+  file_picker: ^5.0.1
+  path_provider: ^2.0.15
   timezone: ^0.10.0
   google_fonts: ^6.0.0
 
