@@ -12,9 +12,25 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => HabitProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        // Add other providers here as needed
       ],
-      child: const HabitTrackerApp(),
+      child: const RootApp(),
     ),
   );
+}
+
+class RootApp extends StatelessWidget {
+  const RootApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final settingsProvider = context.watch<SettingsProvider>();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Habit Tracker',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: const HabitTrackerApp(),
+    );
+  }
 }
