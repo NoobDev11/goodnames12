@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
+import '../widgets/floating_navbar.dart';  // Import your FloatingNavbar widget here
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -52,7 +53,7 @@ class HomeTab extends StatelessWidget {
         final bool isDone = habitProvider.isHabitCompletedToday(habit.id);
 
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 7),
           elevation: 4,
           child: ListTile(
             leading: CircleAvatar(
@@ -61,14 +62,14 @@ class HomeTab extends StatelessWidget {
             ),
             title: Text(
               habit.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
             ),
             subtitle: habit.reminderTime != null
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 4),
                       Text(_formatTime(habit.reminderTime)!,
                           style: const TextStyle(color: Colors.deepPurple)),
                     ],
@@ -80,11 +81,11 @@ class HomeTab extends StatelessWidget {
               },
               child: isDone
                   ? Container(
-                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: markerColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(13),
                       ),
+                      padding: const EdgeInsets.all(7),
                       child: Icon(markerData, color: Colors.white, size: 24),
                     )
                   : const Icon(Icons.radio_button_unchecked,
@@ -97,73 +98,47 @@ class HomeTab extends StatelessWidget {
   }
 }
 
+// Implement your real Calendar, Stats, Achievement, and Settings Screens here
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Calendar')),
-      body: Center(child: const Text('Your calendar UI here')),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Calendar')), body: const Center(child: Text('Calendar UI')));
 }
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Stats')),
-      body: Center(child: const Text('Your stats UI here')),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Stats')), body: const Center(child: Text('Stats UI')));
 }
 
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Medals')),
-      body: Center(child: const Text('Your medals UI here')),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Achievements')), body: const Center(child: Text('Achievements UI')));
 }
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: Center(child: const Text('Your settings UI here')),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Settings')), body: const Center(child: Text('Settings UI')));
 }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   int _selectedIndex = 0;
-  late List<Widget> _screens;
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
-
     _screens = [
       const HomeTab(),
       const CalendarScreen(),
@@ -171,16 +146,8 @@ class _HomeScreenState extends State<HomeScreen>
       const AchievementScreen(),
       const SettingsScreen(),
     ];
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
-
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
   }
 
@@ -190,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-  void _onNavBarTap(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
       _controller.reset();
@@ -206,39 +173,14 @@ class _HomeScreenState extends State<HomeScreen>
         child: _screens[_selectedIndex],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed('/addHabit');
-        },
+        onPressed: () => Navigator.of(context).pushNamed('/addHabit'),
         tooltip: 'Add new habit',
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: FloatingNavbar(
         currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: 'Medals',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        onTap: _onNavBarTap,
+        onTap: _onItemTapped,
       ),
     );
   }
