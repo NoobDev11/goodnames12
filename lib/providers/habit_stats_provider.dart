@@ -27,9 +27,10 @@ class HabitStatsProvider extends ChangeNotifier {
       final day = today.subtract(Duration(days: i));
       if (isHabitDone(habitId, day))
         streak++;
-      else
+      else{
         break;
-    }
+      }
+      }
     return streak;
   }
 
