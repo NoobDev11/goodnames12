@@ -61,38 +61,41 @@ class HomeTab extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 7),
           elevation: 4,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: iconColor,
-              child: Icon(iconData, color: Colors.white),
-            ),
-            title: Text(
-              habit.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-            ),
-            subtitle: habit.reminderTime != null
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
-                      const SizedBox(width: 4),
-                      Text(_formatTime(habit.reminderTime)!,
-                          style: const TextStyle(color: Colors.deepPurple)),
-                    ],
-                  )
-                : null,
-            trailing: GestureDetector(
-              onTap: () {
-                habitProvider.toggleHabitCompleted(habit.id);
-              },
-              child: isDone
-                  ? Icon(
+          child: SizedBox(
+            height: 80,  // Fixed height for all habit cards
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: iconColor,
+                child: Icon(iconData, color: Colors.white),
+              ),
+              title: Text(
+                habit.name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              ),
+              subtitle: habit.reminderTime != null
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
+                        const SizedBox(width: 4),
+                        Text(_formatTime(habit.reminderTime)!,
+                            style: const TextStyle(color: Colors.deepPurple)),
+                      ],
+                    )
+                  : null,
+              trailing: GestureDetector(
+                onTap: () {
+                  habitProvider.toggleHabitCompleted(habit.id);
+                },
+                child: isDone
+                    ? Icon(
                         markerData,
                         color: markerColor,
                         size: 28,  // slightly bigger for better visibility
-                  );
-                  : const Icon(Icons.radio_button_unchecked,
-                      color: Colors.grey, size: 28),
+                      )
+                    : const Icon(Icons.radio_button_unchecked,
+                        color: Colors.grey, size: 28),
+              ),
             ),
           ),
         );
@@ -153,6 +156,10 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Today'),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           FadeTransition(
