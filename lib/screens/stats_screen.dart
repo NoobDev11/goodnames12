@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
+import '../providers/habit_stats_provider.dart';
 import '../models/habit.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -30,16 +31,36 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final habitProvider = context.watch<HabitProvider>();
+    final habitStats = context.watch<HabitStatsProvider>();
 
-    // Here you would obtain stats data for habits - mock example:
-    // Replace these with real data sources or computed values
-    List<int> progress = _selectedHabitId == 'all'
-        ? [5, 3, 7, 2, 6, 1, 4]
-        : [1, 2, 3, 1, 0, 0, 1]; // demo
+    // For demo, calculate last 7 days progress from HabitStatsProvider
+    List<int> progress = [];
+    DateTime today = DateTime.now();
+    if (_selectedHabitId == 'all') {
+      progress = List.generate(7, (i) {
+        // Sum completions for all habits on day
+        int dayIndex = 6 - i;
+        DateTime day = today.subtract(Duration(days: dayIndex));
+        int count = 0;
+        for (final habit in _habits) {
+          if (habitStats.isHabitDone(habit.id, day)) count++;
+        }
+        return count;
+      });
+    } else {
+      progress = List.generate(7, (i) {
+        int dayIndex = 6 - i;
+        DateTime day = today.subtract(Duration(days: dayIndex));
+        return habitStats.isHabitDone(_selectedHabitId, day) ? 1 : 0;
+      });
+    }
 
-    int currentStreak = 4; // demo
-    int longestStreak = 7; // demo
+    int currentStreak = (_selectedHabitId == 'all')
+        ? 0 // Define combined streak logic if needed
+        : habitStats.currentStreak(_selectedHabitId);
+    int longestStreak = (_selectedHabitId == 'all')
+        ? 0 // Define combined streak logic if needed
+        : habitStats.longestStreak(_selectedHabitId);
 
     bool hasEnoughData = progress.isNotEmpty && progress.any((x) => x > 0);
 
