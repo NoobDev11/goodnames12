@@ -4,7 +4,7 @@ import '../providers/habit_provider.dart';
 import '../models/habit.dart';
 import '../widgets/floating_navbar.dart';
 
-// Import your actual screen widgets here
+// Import your actual screen pages here
 import '../screens/calendar_screen.dart';
 import '../screens/stats_screen.dart';
 import '../screens/achievement_screen.dart';
@@ -106,7 +106,6 @@ class HomeTab extends StatelessWidget {
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -117,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen>
   late Animation<double> _animation;
 
   int _selectedIndex = 0;
-  late List<Widget> _screens;
+  late final List<Widget> _screens;
 
   @override
   void initState() {
@@ -157,22 +156,29 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FadeTransition(
-        opacity: _animation,
-        child: _screens[_selectedIndex],
+      body: Stack(
+        children: [
+          FadeTransition(
+            opacity: _animation,
+            child: _screens[_selectedIndex],
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 15,
+            child: FloatingNavbar(
+              currentIndex: _selectedIndex,
+              onTap: _onTabTapped,
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed('/addHabit');
-        },
+        onPressed: () => Navigator.of(context).pushNamed('/addHabit'),
         tooltip: 'Add new habit',
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: FloatingNavbar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-      ),
     );
   }
 }
