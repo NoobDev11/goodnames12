@@ -26,12 +26,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (value) {
         final permissionStatus = await Permission.notification.request();
         if (!permissionStatus.isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Notification permission denied')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Notification permission denied')));
+          }
           return;
         }
       }
-      settings.setNotificationsEnabled(value);
+      if (mounted) {
+        settings.setNotificationsEnabled(value);
+      }
       // TODO: Add notification scheduling logic here
     }
 
@@ -48,12 +52,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (result != null && result.files.single.path != null) {
           final file = File(result.files.single.path!);
           await dataService.importFromFile(file);
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Imported data from: ${file.path}')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Imported data from: ${file.path}')));
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to import data: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to import data: $e')));
+        }
       }
     }
 
@@ -61,22 +69,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
       try {
         final status = await Permission.storage.request();
         if (!status.isGranted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Storage permission denied')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Storage permission denied')));
+          }
           return;
         }
 
         String? selectedDir = await FilePicker.platform.getDirectoryPath();
         if (selectedDir != null) {
           final dataJson = dataService.prepareExportJson();
+
+          // Using path_provider to get directory if needed or verify path
+
           final file = File('$selectedDir/habits_export_${DateTime.now().millisecondsSinceEpoch}.json');
           await file.writeAsString(dataJson);
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Data exported to: ${file.path}')));
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Data exported to: ${file.path}')));
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to export data: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to export data: $e')));
+        }
       }
     }
 
