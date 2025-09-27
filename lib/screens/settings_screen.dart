@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
@@ -36,7 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         settings.setNotificationsEnabled(value);
       }
-      // TODO: Add notification scheduling logic here
     }
 
     void onDarkModeToggle(bool value) {
@@ -79,8 +77,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         String? selectedDir = await FilePicker.platform.getDirectoryPath();
         if (selectedDir != null) {
           final dataJson = dataService.prepareExportJson();
-
-          // Using path_provider to get directory if needed or verify path
 
           final file = File('$selectedDir/habits_export_${DateTime.now().millisecondsSinceEpoch}.json');
           await file.writeAsString(dataJson);
