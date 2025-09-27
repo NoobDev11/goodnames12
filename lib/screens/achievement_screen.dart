@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
-import '../models/habit.dart';
-import '../models/achievement.dart';
+import '../models/habit.dart' as habit_model;
+import '../models/achievement.dart' as achievement_model;
 
 class AchievementScreen extends StatefulWidget {
   const AchievementScreen({super.key});
@@ -38,15 +38,15 @@ class _AchievementScreenState extends State<AchievementScreen>
     super.dispose();
   }
 
-  List<Achievement> _getAchievementsForHabit(Habit habit) {
+  List<achievement_model.Achievement> _getAchievementsForHabit(habit_model.Habit habit) {
     return habit.achievements ?? [];
   }
 
-  int _calculateTotalPoints(List<Achievement> achievements) {
+  int _calculateTotalPoints(List<achievement_model.Achievement> achievements) {
     return achievements.where((a) => a.achieved).fold(0, (sum, a) => sum + a.points);
   }
 
-  int _calculateMedalsEarned(List<Achievement> achievements) {
+  int _calculateMedalsEarned(List<achievement_model.Achievement> achievements) {
     return achievements.where((a) => a.achieved).length;
   }
 
@@ -54,10 +54,16 @@ class _AchievementScreenState extends State<AchievementScreen>
   Widget build(BuildContext context) {
     final habitProvider = context.watch<HabitProvider>();
     final habits = habitProvider.habits;
-    final habit = habits.firstWhere(
-      (h) => h.id == _selectedHabitId,
-      orElse: () => habits.isNotEmpty ? habits.first : null,
-    );
+    habit_model.Habit? habit;
+
+    if (_selectedHabitId != null && _selectedHabitId!.isNotEmpty) {
+      habit = habits.firstWhere(
+        (h) => h.id == _selectedHabitId,
+        orElse: () => habits.isNotEmpty ? habits.first : null,
+      );
+    } else {
+      habit = habits.isNotEmpty ? habits.first : null;
+    }
 
     if (habit == null) {
       return const Scaffold(
@@ -120,7 +126,7 @@ class _AchievementScreenState extends State<AchievementScreen>
               itemCount: habits.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                Habit h = habits[index];
+                habit_model.Habit h = habits[index];
                 bool isSelected = h.id == _selectedHabitId;
                 return GestureDetector(
                   onTap: () {
@@ -175,7 +181,6 @@ class _AchievementScreenState extends State<AchievementScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Using Image.asset to load medal icon
                           Padding(
                             padding: const EdgeInsets.only(bottom: 6.0),
                             child: Image.asset(
