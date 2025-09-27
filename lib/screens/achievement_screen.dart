@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
-import '../models/achievement.dart'; // Import Achievement model if separate
+import '../models/achievement.dart';
 
 class AchievementScreen extends StatefulWidget {
   const AchievementScreen({super.key});
@@ -175,8 +175,16 @@ class _AchievementScreenState extends State<AchievementScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.stars, color: Colors.white, size: 36),
-                          const SizedBox(height: 6),
+                          // Using Image.asset to load medal icon
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6.0),
+                            child: Image.asset(
+                              achievement.medalIconAsset,
+                              width: 36,
+                              height: 36,
+                              color: isAchieved ? null : Colors.black26,
+                            ),
+                          ),
                           Text(
                             label,
                             style: TextStyle(
