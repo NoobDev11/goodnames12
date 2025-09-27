@@ -42,7 +42,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   ];
 
   final List<String> _iconColors = [
-   '#ff595e',
+    '#ff595e',
     '#f15152',
     '#ffca3a',
     '#f2af29',
@@ -50,7 +50,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6b4a99', // fixed typo from previous e.g. 6b4b99
+    '#6b4a99',
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -69,7 +69,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.build_circle_rounded,
     Icons.pause_circle_filled_rounded,
     Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded, // corrected icon name here
+    Icons.swap_horizontal_circle_rounded,
     Icons.clear_rounded,
     Icons.star_rounded,
     Icons.stars_rounded,
@@ -111,7 +111,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   Future<void> _selectReminderTime() async {
-    final TimeOfDay? picked =
+    final picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) {
       setState(() => _reminderTime = picked);
@@ -119,14 +119,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-  final r = (color.r * 255).round() & 0xFF;
-  final g = (color.g * 255).round() & 0xFF;
-  final b = (color.b * 255).round() & 0xFF;
-  return '#'
-      '${r.toRadixString(16).padLeft(2, '0')}'
-      '${g.toRadixString(16).padLeft(2, '0')}'
-      '${b.toRadixString(16).padLeft(2, '0')}';
-}
+    final r = color.red & 0xFF;
+    final g = color.green & 0xFF;
+    final b = color.blue & 0xFF;
+    return '#'
+        '${r.toRadixString(16).padLeft(2, '0')}'
+        '${g.toRadixString(16).padLeft(2, '0')}'
+        '${b.toRadixString(16).padLeft(2, '0')}';
+  }
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) return;
@@ -135,8 +135,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     if (_reminderTime != null) {
       final now = DateTime.now();
       reminderDateTime = DateTime(
-        now.year, now.month, now.day,
-        _reminderTime!.hour, _reminderTime!.minute,
+        now.year,
+        now.month,
+        now.day,
+        _reminderTime!.hour,
+        _reminderTime!.minute,
       );
     }
 
@@ -301,7 +304,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                 ),
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                       const SizedBox(height: 18),
