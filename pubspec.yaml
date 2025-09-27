@@ -36,7 +36,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
-  - assets/icons/
+  - assets/icon/
 
   # Uncomment and add asset paths if you have images/fonts
   # assets:
