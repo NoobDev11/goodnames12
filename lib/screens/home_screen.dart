@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 import '../models/habit.dart';
-import '../widgets/floating_navbar.dart';  // Import your FloatingNavbar widget here
+import '../widgets/floating_navbar.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -98,33 +98,49 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// Implement your real Calendar, Stats, Achievement, and Settings Screens here
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Calendar')), body: const Center(child: Text('Calendar UI')));
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Calendar')),
+        body: const Center(child: Text('Calendar UI')),
+      );
 }
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Stats')), body: const Center(child: Text('Stats UI')));
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Stats')),
+        body: const Center(child: Text('Stats UI')),
+      );
 }
 
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Achievements')), body: const Center(child: Text('Achievements UI')));
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Achievements')),
+        body: const Center(child: Text('Achievements UI')),
+      );
 }
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Settings')), body: const Center(child: Text('Settings UI')));
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Settings')),
+        body: const Center(child: Text('Settings UI')),
+      );
 }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -139,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+
     _screens = [
       const HomeTab(),
       const CalendarScreen(),
@@ -146,6 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       const AchievementScreen(),
       const SettingsScreen(),
     ];
+
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
@@ -173,7 +191,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         child: _screens[_selectedIndex],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pushNamed('/addHabit'),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/addHabit');
+        },
         tooltip: 'Add new habit',
         child: const Icon(Icons.add),
       ),
