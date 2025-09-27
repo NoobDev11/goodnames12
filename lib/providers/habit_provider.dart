@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
 import '../data/local_storage.dart';
-// Import your habit_stats_provider to link here (assuming in same level)
 import 'habit_stats_provider.dart';
 
 class HabitProvider extends ChangeNotifier {
@@ -87,36 +86,58 @@ class HabitProvider extends ChangeNotifier {
     await LocalStorage().saveString('habitCompletedToday', jsonEncode(_habitCompletedToday));
   }
 
-  // Updated toggle to notify stats provider about completion change
   void toggleHabitCompleted(String id) {
     bool current = _habitCompletedToday[id] ?? false;
     _habitCompletedToday[id] = !current;
     _saveHabitCompletedToday();
     notifyListeners();
 
-    // Update stats provider about today's habit completion
+    // Notify stats provider about completion toggle
     statsProvider.markHabitDone(id, DateTime.now(), !current);
 
-    // TODO: Add achievement unlocking logic here if needed
+    // Unlock achievements if conditions met - example placeholder logic
+    Habit? habit = getHabitById(id);
+    if (habit != null && habit.achievements != null) {
+      for (var achievement in habit.achievements!) {
+        if (!achievement.achieved) {
+          // Example: Unlock achievements when streak exceeds achievement days
+          int streak = statsProvider.currentStreak(id);
+          if (streak >= achievement.days) {
+            achievement.achieved = true;
+            // Could notify listeners or persist achievement state here
+          }
+        }
+      }
+      saveAchievementsForHabit(habit);
+    }
+  }
+
+  // Save achievement updates for habit persistently
+  Future<void> saveAchievementsForHabit(Habit habit) async {
+    int index = _habits.indexWhere((h) => h.id == habit.id);
+    if (index >= 0) {
+      _habits[index] = habit;
+      await _saveHabits();
+      notifyListeners();
+    }
   }
 
   bool isHabitCompletedToday(String id) {
     return _habitCompletedToday[id] ?? false;
   }
 
-  // Import replaces all habits - consider resetting stats or re-importing appropriately
   Future<void> importHabits(List<Habit> importedHabits) async {
     _habits = importedHabits;
-
-    // Ideally reset or recalculate stats here
-    // TODO: Integration with statsProvider for imported data sync
+    // Recalculate or load stats data as needed after import
+    // For example, clear existing stats and reload from import (if provided)
+    // TODO: Implement statsProvider sync logic here if necessary
 
     await _saveHabits();
     notifyListeners();
   }
 
-  // Generate JSON for export, consider also exporting stats and achievements
   String generateExportJson() {
+    // Include achievements in export if needed (already inside Habit.toJson)
     List<Map<String, dynamic>> jsonList = _habits.map((h) => h.toJson()).toList();
     return jsonEncode(jsonList);
   }
