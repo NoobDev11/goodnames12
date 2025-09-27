@@ -15,13 +15,13 @@ class HomeTab extends StatelessWidget {
     }
   }
 
-  String? _formatTime(DateTime? dateTime) {
-    if (dateTime == null) return null;
-    var hour = dateTime.hour;
-    var minute = dateTime.minute.toString().padLeft(2, '0');
-    var suffix = "AM";
+  String? _formatTime(DateTime? dt) {
+    if (dt == null) return null;
+    int hour = dt.hour;
+    String minute = dt.minute.toString().padLeft(2, '0');
+    String suffix = 'AM';
     if (hour >= 12) {
-      suffix = "PM";
+      suffix = 'PM';
       if (hour > 12) hour -= 12;
     }
     if (hour == 0) hour = 12;
@@ -44,16 +44,15 @@ class HomeTab extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       itemCount: habits.length,
       itemBuilder: (context, index) {
-        final Habit habit = habits[index];
-        final IconData iconData = _iconDataFromString(habit.iconName);
-        final IconData markerData = _iconDataFromString(habit.markerIcon);
-        final Color markerColor = _colorFromHex(habit.markerColorHex);
-        final Color iconColor = _colorFromHex(habit.iconColorHex);
-
-        final bool isDone = habit.isCompletedToday ?? false;
+        final habit = habits[index];
+        final iconData = _iconDataFromString(habit.iconName);
+        final markerData = _iconDataFromString(habit.markerIcon);
+        final iconColor = _colorFromHex(habit.iconColorHex);
+        final markerColor = _colorFromHex(habit.markerColorHex);
+        final bool isDone = habitProvider.isHabitCompletedToday(habit.id);
 
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 7),
+          margin: const EdgeInsets.symmetric(vertical: 8),
           elevation: 4,
           child: ListTile(
             leading: CircleAvatar(
@@ -62,14 +61,14 @@ class HomeTab extends StatelessWidget {
             ),
             title: Text(
               habit.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             subtitle: habit.reminderTime != null
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 5),
                       Text(_formatTime(habit.reminderTime)!,
                           style: const TextStyle(color: Colors.deepPurple)),
                     ],
@@ -81,14 +80,15 @@ class HomeTab extends StatelessWidget {
               },
               child: isDone
                   ? Container(
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: markerColor,
-                        borderRadius: BorderRadius.circular(13),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      padding: const EdgeInsets.all(7),
                       child: Icon(markerData, color: Colors.white, size: 24),
                     )
-                  : Icon(Icons.radio_button_unchecked, color: Colors.grey, size: 24),
+                  : const Icon(Icons.radio_button_unchecked,
+                      color: Colors.grey, size: 24),
             ),
           ),
         );
@@ -97,56 +97,57 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// Actual calendar widget page
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Calendar')),
-      body: Center(child: Text('Your full calendar UI goes here.')),
+      body: Center(child: const Text('Your calendar UI here')),
     );
   }
 }
 
-// Actual stats widget page
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Stats')),
-      body: Center(child: Text('Your stats and graphs go here.')),
+      body: Center(child: const Text('Your stats UI here')),
     );
   }
 }
 
-// Real achievements page widget
 class AchievementScreen extends StatelessWidget {
   const AchievementScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Achievements')),
-      body: Center(child: Text('Show badges and completed goals here.')),
+      appBar: AppBar(title: const Text('Medals')),
+      body: Center(child: const Text('Your medals UI here')),
     );
   }
 }
 
-// Real settings page widget
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: Center(child: Text('Settings UI here.')),
+      body: Center(child: const Text('Your settings UI here')),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -155,12 +156,14 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+
   int _selectedIndex = 0;
   late List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+
     _screens = [
       const HomeTab(),
       const CalendarScreen(),
@@ -168,11 +171,16 @@ class _HomeScreenState extends State<HomeScreen>
       const AchievementScreen(),
       const SettingsScreen(),
     ];
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+
     _controller.forward();
   }
 
@@ -209,11 +217,26 @@ class _HomeScreenState extends State<HomeScreen>
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_events), label: 'Medals'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Stats',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events),
+            label: 'Medals',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
         onTap: _onNavBarTap,
       ),
