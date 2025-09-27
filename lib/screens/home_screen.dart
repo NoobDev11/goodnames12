@@ -62,7 +62,7 @@ class HomeTab extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 7),
           elevation: 4,
           child: SizedBox(
-            height: 80,  // Fixed height for all habit cards
+            height: 80, // Fixed height for all habit cards
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: iconColor,
@@ -91,7 +91,7 @@ class HomeTab extends StatelessWidget {
                     ? Icon(
                         markerData,
                         color: markerColor,
-                        size: 28,  // slightly bigger for better visibility
+                        size: 28, // slightly bigger for better visibility
                       )
                     : const Icon(Icons.radio_button_unchecked,
                         color: Colors.grey, size: 28),
