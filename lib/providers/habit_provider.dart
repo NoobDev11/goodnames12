@@ -139,23 +139,23 @@ class HabitProvider extends ChangeNotifier {
 
   List<Achievement> _initDefaultAchievements(int? customTarget) {
     List<Achievement> milestones = [
-      Achievement(days: 3, points: 5, achieved: false, medalIcon: 'assets/icons/medal_3_days.png'),
-      Achievement(days: 7, points: 10, achieved: false, medalIcon: 'assets/icons/medal_7_days.png'),
-      Achievement(days: 15, points: 15, achieved: false, medalIcon: 'assets/icons/medal_15_days.png'),
-      Achievement(days: 30, points: 20, achieved: false, medalIcon: 'assets/icons/medal_30_days.png'),
-      Achievement(days: 60, points: 30, achieved: false, medalIcon: 'assets/icons/medal_60_days.png'),
-      Achievement(days: 90, points: 50, achieved: false, medalIcon: 'assets/icons/medal_90_days.png'),
-      Achievement(days: 180, points: 75, achieved: false, medalIcon: 'assets/icons/medal_180_days.png'),
-      Achievement(days: 365, points: 100, achieved: false, medalIcon: 'assets/icons/medal_365_days.png'),
+      Achievement(days: 3, points: 5, achieved: false, medalIcon: 'assets/icon/medal_3_days.png'),
+      Achievement(days: 7, points: 10, achieved: false, medalIcon: 'assets/icon/medal_7_days.png'),
+      Achievement(days: 15, points: 15, achieved: false, medalIcon: 'assets/icon/medal_15_days.png'),
+      Achievement(days: 30, points: 20, achieved: false, medalIcon: 'assets/icon/medal_30_days.png'),
+      Achievement(days: 60, points: 30, achieved: false, medalIcon: 'assets/icon/medal_60_days.png'),
+      Achievement(days: 90, points: 50, achieved: false, medalIcon: 'assets/icon/medal_90_days.png'),
+      Achievement(days: 180, points: 75, achieved: false, medalIcon: 'assets/icon/medal_180_days.png'),
+      Achievement(days: 365, points: 100, achieved: false, medalIcon: 'assets/icon/medal_365_days.png'),
     ];
 
     if (customTarget != null && customTarget > 0) {
       milestones.add(
-        Achievement(days: customTarget, points: 0, achieved: false, label: 'Custom Target', medalIcon: 'assets/icons/medal_custom_days.png'),
+        Achievement(days: customTarget, points: 0, achieved: false, label: 'Custom Target', medalIcon: 'assets/icon/medal_custom_days.png'),
       );
     } else {
       milestones.add(
-        Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Target Placeholder', medalIcon: 'assets/icons/medal_custom_days.png'),
+        Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Target Placeholder', medalIcon: 'assets/icon/medal_custom_days.png'),
       );
     }
 
