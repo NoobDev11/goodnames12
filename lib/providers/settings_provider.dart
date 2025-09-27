@@ -14,7 +14,7 @@ class SettingsProvider extends ChangeNotifier {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? false;
     _darkMode = prefs.getBool('darkMode') ?? false;
     notifyListeners();
   }
