@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_provider.dart';
+import '../models/habit.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -8,33 +11,37 @@ class StatsScreen extends StatefulWidget {
 }
 
 class _StatsScreenState extends State<StatsScreen> {
-  String _selectedHabit = 'All Habits';
+  String _selectedHabitId = 'all';
 
-  final List<String> _habits = ['All Habits', 'Meditation', 'Running', 'Read'];
+  List<Habit> get _habits => context.read<HabitProvider>().habits;
+  List<String> get _habitFilterIds => ['all', ..._habits.map((h) => h.id)];
 
-  // Dummy data for progress - should ideally come from a stats service
-  final Map<String, List<int>> _weeklyProgress = {
-    'All Habits': [5, 3, 7, 2, 6, 1, 4],
-    'Meditation': [1, 2, 3, 1, 0, 0, 1],
-    'Running': [0, 1, 2, 3, 4, 2, 1],
-    'Read': [4, 0, 1, 2, 2, 0, 2],
-  };
-
-  final Map<String, int> _currentStreak = {
-    'Meditation': 4,
-    'Running': 10,
-    'Read': 3,
-  };
-
-  final Map<String, int> _longestStreak = {
-    'Meditation': 7,
-    'Running': 12,
-    'Read': 5,
-  };
+  String _habitNameById(String id) {
+    if (id == 'all') return 'All Habits';
+    return _habits.firstWhere((h) => h.id == id, orElse: () => Habit(
+      id: 'all',
+      name: 'Unknown',
+      iconName: '',
+      iconColorHex: '',
+      markerIcon: '',
+      markerColorHex: ''
+    )).name;
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<int> progress = _weeklyProgress[_selectedHabit] ?? [];
+    final habitProvider = context.watch<HabitProvider>();
+
+    // Here you would obtain stats data for habits - mock example:
+    // Replace these with real data sources or computed values
+    List<int> progress = _selectedHabitId == 'all'
+        ? [5, 3, 7, 2, 6, 1, 4]
+        : [1, 2, 3, 1, 0, 0, 1]; // demo
+
+    int currentStreak = 4; // demo
+    int longestStreak = 7; // demo
+
+    bool hasEnoughData = progress.isNotEmpty && progress.any((x) => x > 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -45,34 +52,30 @@ class _StatsScreenState extends State<StatsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Habit Filters - Tabs/Pills
             SizedBox(
               height: 50,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: _habits.length,
+                itemCount: _habitFilterIds.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
-                  final habit = _habits[index];
-                  final isSelected = habit == _selectedHabit;
+                  String id = _habitFilterIds[index];
+                  bool selected = _selectedHabitId == id;
                   return GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _selectedHabit = habit;
-                      });
+                      setState(() => _selectedHabitId = id);
                     },
                     child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.deepPurple : Colors.grey[300],
+                        color: selected ? Colors.deepPurple : Colors.grey[300],
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
                         child: Text(
-                          habit,
+                          _habitNameById(id),
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: selected ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
@@ -83,50 +86,61 @@ class _StatsScreenState extends State<StatsScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Weekly Progress Bar Graph
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Weekly Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('+40%', style: TextStyle(fontSize: 16, color: Colors.green.shade700)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(7, (index) {
-                final val = progress.isNotEmpty ? progress[index] : 0;
-                return Flexible(
-                  child: Container(
-                    height: val * 10.0,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(8),
+            Expanded(
+              child: ListView(
+                children: [
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Weekly Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          hasEnoughData
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: List.generate(7, (index) {
+                                    final val = progress[index];
+                                    return Flexible(
+                                      child: Container(
+                                        height: val * 10.0,
+                                        width: 20,
+                                        decoration: BoxDecoration(
+                                          color: Colors.deepPurple,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                )
+                              : const Text('Not enough data', style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
                     ),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 18),
 
-            // Current and Longest Streak
-            if (_selectedHabit != 'All Habits')
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStreakCard('Current Streak', _currentStreak[_selectedHabit] ?? 0),
-                  _buildStreakCard('Longest Streak', _longestStreak[_selectedHabit] ?? 0),
+                  if (_selectedHabitId != 'all')
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStreakCard('Current Streak', currentStreak),
+                        _buildStreakCard('Longest Streak', longestStreak),
+                      ],
+                    ),
+
+                  if (_selectedHabitId == 'all') 
+                    const Padding(
+                      padding: EdgeInsets.only(top: 36),
+                      child: Text(
+                        'Select a habit to see detailed streak data.',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
                 ],
               ),
-
-            if (_selectedHabit == 'All Habits') ...[
-              const SizedBox(height: 36),
-              const Text(
-                'Select a habit to see detailed streak data.',
-                style: TextStyle(color: Colors.grey),
-              )
-            ],
+            )
           ],
         ),
       ),
