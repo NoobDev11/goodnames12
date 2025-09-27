@@ -83,7 +83,6 @@ class HabitProvider extends ChangeNotifier {
     await LocalStorage().saveString('habitCompletedToday', jsonEncode(_habitCompletedToday));
   }
 
-  // MAIN: marking/unmarking logic for today, triggers marker on home screen
   void toggleHabitCompleted(String id) {
     bool current = _habitCompletedToday[id] ?? false;
     _habitCompletedToday[id] = !current;
@@ -91,8 +90,20 @@ class HabitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Helper to expose today's state to UI, e.g. for the card trailing marker/icon
   bool isHabitCompletedToday(String id) {
     return _habitCompletedToday[id] ?? false;
+  }
+
+  // New method to import a list of habits completely replacing current
+  Future<void> importHabits(List<Habit> importedHabits) async {
+    _habits = importedHabits;
+    await _saveHabits();
+    notifyListeners();
+  }
+
+  // New method to generate export JSON string of habits
+  String generateExportJson() {
+    List<Map<String, dynamic>> jsonList = _habits.map((h) => h.toJson()).toList();
+    return jsonEncode(jsonList);
   }
 }
