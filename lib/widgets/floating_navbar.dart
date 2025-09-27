@@ -12,10 +12,10 @@ class FloatingNavbar extends StatelessWidget {
   ];
 
   const FloatingNavbar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class FloatingNavbar extends StatelessWidget {
     const double barPaddingH = 25;
     const double indicatorOpacity = 0.18;
     final Color purple = const Color(0xFF8857FF); // Design purple
-    final Color lightPurple = const Color(0xFF8857FF).withOpacity(indicatorOpacity);
+    final Color lightPurple = purple.withAlpha((indicatorOpacity * 255).round());
 
     return IgnorePointer(
       ignoring: false,
@@ -39,10 +39,10 @@ class FloatingNavbar extends StatelessWidget {
                 height: barHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(barHeight/2),
+                  borderRadius: BorderRadius.circular(barHeight / 2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.11),
+                      color: Colors.black.withAlpha((0.11 * 255).round()),
                       blurRadius: 22,
                       offset: const Offset(0, 6),
                     ),
@@ -70,7 +70,8 @@ class FloatingNavbar extends StatelessWidget {
             // Icons row
             Center(
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: barPaddingH, vertical: 0),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: barPaddingH, vertical: 0),
                 height: barHeight,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
