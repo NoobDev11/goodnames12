@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../providers/habit_provider.dart';
 import '../providers/habit_stats_provider.dart';
 import '../models/habit.dart';
+import '../models/achievement.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -27,7 +28,7 @@ class _StatsScreenState extends State<StatsScreen> {
         id: 'all',
         name: 'Unknown',
         iconName: '',
-        colorHex: '',
+        iconColorHex: '',
         markerIcon: '',
         markerColorHex: '',
       ),
@@ -38,7 +39,8 @@ class _StatsScreenState extends State<StatsScreen> {
   List<FlSpot> _buildLineChartData(HabitStatsProvider stats, String habitId) {
     final today = DateTime.now();
     const weeksToShow = 12;
-    final startDate = stats.getHabitStartDate(habitId) ?? today.subtract(Duration(days: weeksToShow * 7));
+    final startDate = stats.getHabitStartDate(habitId) ??
+        today.subtract(Duration(days: weeksToShow * 7));
 
     final spots = <FlSpot>[];
     for (int i = 0; i < weeksToShow; i++) {
@@ -209,7 +211,7 @@ class _StatsScreenState extends State<StatsScreen> {
       final longestStreak = habitStats.longestStreak(_selectedHabitId);
 
       final achievements = habit.achievements ?? [];
-      achievements.sort((a, b) => a.days.compareTo(b.days));
+      achievements.sort((a, b) => a.requiredStreak.compareTo(b.requiredStreak));
       final nextMilestone = achievements.isNotEmpty
           ? achievements.firstWhere((a) => !a.achieved, orElse: () => achievements.last)
           : null;
@@ -218,8 +220,8 @@ class _StatsScreenState extends State<StatsScreen> {
       double progressPercent = 0;
 
       if (nextMilestone != null) {
-        progressToNext = nextMilestone.days - currentStreak;
-        progressPercent = (currentStreak / nextMilestone.days).clamp(0.0, 1.0);
+        progressToNext = nextMilestone.requiredStreak - currentStreak;
+        progressPercent = (currentStreak / nextMilestone.requiredStreak).clamp(0.0, 1.0);
       }
 
       final currentWeekCompletion = List.generate(7, (i) {
@@ -228,9 +230,9 @@ class _StatsScreenState extends State<StatsScreen> {
       });
 
       final milestoneWidgets = achievements.map((achievement) {
-        final percent = (currentStreak / achievement.days).clamp(0.0, 1.0);
+        final percent = (currentStreak / achievement.requiredStreak).clamp(0.0, 1.0);
         return ListTile(
-          title: Text(achievement.label ?? '${achievement.days} Days'),
+          title: Text(achievement.title),
           subtitle: LinearProgressIndicator(
             value: percent,
             color: Colors.deepPurple,
@@ -264,7 +266,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Next Milestone: ${nextMilestone?.label ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Next Milestone: ${nextMilestone?.title ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       LinearProgressIndicator(value: progressPercent, color: Colors.deepPurple),
                       const SizedBox(height: 6),
