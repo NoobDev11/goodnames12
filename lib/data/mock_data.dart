@@ -11,6 +11,7 @@ final List<habit_model.Habit> mockHabits = [
     markerColorHex: '#5F3DC4',
     reminderTime: DateTime.now(),
     targetDays: 30,
+    medalAsset: 'assets/icon/medal_custom_days.png',
   ),
   habit_model.Habit(
     id: 'h2',
@@ -21,6 +22,7 @@ final List<habit_model.Habit> mockHabits = [
     markerColorHex: '#D6336C',
     reminderTime: DateTime.now(),
     targetDays: 60,
+    medalAsset: 'assets/icon/medal_custom_days.png',
   ),
   habit_model.Habit(
     id: 'h3',
@@ -31,6 +33,7 @@ final List<habit_model.Habit> mockHabits = [
     markerColorHex: '#24B875',
     reminderTime: DateTime.now(),
     targetDays: 90,
+    medalAsset: 'assets/icon/medal_custom_days.png',
   ),
 ];
 
