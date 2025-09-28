@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/habit_provider.dart';
-import '../services/data_service.dart';
+import '../services/data.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -36,14 +36,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       if (!mounted) return;
       await settings.setNotificationsEnabled(value);
-      // Add schedule/ cancel notification logic in SettingsProvider as needed
+      // Add schedule/cancel notification logic as required
     }
 
     void onToggleDarkMode(bool value) {
       settings.setDarkModeEnabled(value);
     }
 
-    Future<void> onImportData() async {
+    Future<void> onImport() async {
+      final contextCopy = context;
       try {
         final result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
@@ -54,24 +55,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           final file = File(result.files.single.path!);
           await dataService.importFromFile(file);
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(contextCopy).showSnackBar(
             SnackBar(content: Text('Imported from: ${file.path}')),
           );
         }
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to import data: $e')),
+        ScaffoldMessenger.of(contextCopy).showSnackBar(
+          SnackBar(content: Text('Failed to import: $e')),
         );
       }
     }
 
-    Future<void> onExportData() async {
+    Future<void> onExport() async {
+      final contextCopy = context;
       try {
         final status = await Permission.storage.request();
         if (!status.isGranted) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            ScaffoldMessenger.of(contextCopy).showSnackBar(
               const SnackBar(content: Text('Storage permission denied')),
             );
           }
@@ -80,8 +82,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final directory = await getExternalStorageDirectory();
         if (directory == null) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Unable to access storage')),
+            ScaffoldMessenger.of(contextCopy).showSnackBar(
+              const SnackBar(content: Text('Cannot access storage')),
             );
           }
           return;
@@ -89,15 +91,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final path = directory.path;
         final filename = 'habits_export_${DateTime.now().millisecondsSinceEpoch}.json';
         final file = File('$path/$filename');
-        final jsonString = await dataService.prepareJsonExport();
-        await file.writeAsString(jsonString);
+        final json = await dataService.prepareJsonExport();
+        await file.writeAsString(json);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(contextCopy).showSnackBar(
           SnackBar(content: Text('Exported to: ${file.path}')),
         );
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(contextCopy).showSnackBar(
           SnackBar(content: Text('Export failed: $e')),
         );
       }
@@ -130,13 +132,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.download),
             title: const Text('Import Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: onImportData,
+            onTap: onImport,
           ),
           ListTile(
             leading: const Icon(Icons.upload),
             title: const Text('Export Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: onExportData,
+            onTap: onExport,
           ),
           const SizedBox(height: 24),
           const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
