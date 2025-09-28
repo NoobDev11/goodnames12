@@ -13,7 +13,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    tz.initializeTimeZones();  // Use latest timezone data
+    tz.initializeTimeZones();
 
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -34,27 +34,29 @@ class NotificationService {
     final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
-  id,
-  title,
-  body,
-  tzScheduled,
-  NotificationDetails(
-    android: AndroidNotificationDetails(
-      'habit_channel',
-      'Habit Notifications',
-      channelDescription: 'Reminders for habits',
-      importance: Importance.max,
-      priority: Priority.high,
-    ),
-  ),
-  androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  matchDateTimeComponents:
-      recurringDaily ? DateTimeComponents.time : null,
-);
-
+      id,
+      title,
+      body,
+      tzScheduled,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'habit_channel',
+          'Habit Notifications',
+          channelDescription: 'Reminders for habits',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents:
+          recurringDaily ? DateTimeComponents.time : null, // Repeat daily if needed
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
+    );
   }
 
-  Future<void> cancelNotification(int id) async {
+  // Consistent cancel API for compatibility
+  Future<void> cancel(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
   }
 }
