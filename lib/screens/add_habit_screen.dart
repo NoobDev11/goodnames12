@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models.dart';
+import '../models/ habit.dart';
 import '../providers/habit_provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
@@ -12,15 +12,14 @@ class AddHabitScreen extends StatefulWidget {
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _habitNameController = TextEditingController();
+  final _habitNameController = TextEditingController();
   TimeOfDay? _reminderTime;
   String? _targetDays;
   IconData? _selectedIcon;
   String? _selectedColor;
   IconData? _selectedMarker;
 
-  final List<IconData> _habitIcons = [
+  final _habitIcons = [
     Icons.directions_run,
     Icons.spa_rounded,
     Icons.bolt_rounded,
@@ -41,7 +40,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.bookmark,
   ];
 
-  final List<String> _iconColors = [
+  final _iconColors = [
     '#ff595e',
     '#f15152',
     '#ffca3a',
@@ -62,13 +61,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#da6278',
   ];
 
-  final List<IconData> _customMarkers = [
+  final _customMarkers = [
     Icons.check_circle,
     Icons.arrow_upward,
     Icons.arrow_downward,
     Icons.build_circle,
-    Icons.pause_circle,
-    Icons.play_circle,
+    Icons.pause,
+    Icons.play_arrow,
     Icons.swap_horiz,
     Icons.clear,
     Icons.star,
@@ -83,13 +82,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.block,
   ];
 
-  final Map<IconData, Color> _markerColors = {
+  final _markerColors = {
     Icons.check_circle: Colors.green,
     Icons.arrow_upward: Colors.blue,
     Icons.arrow_downward: Colors.blue,
     Icons.build_circle: Colors.orange,
-    Icons.pause_circle: Colors.yellow,
-    Icons.play_circle: Colors.green,
+    Icons.pause: Colors.yellow,
+    Icons.play_arrow: Colors.green,
     Icons.swap_horiz: Colors.teal,
     Icons.clear: Colors.amber,
     Icons.star: Colors.teal,
@@ -130,21 +129,20 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       return;
     }
 
-    DateTime? reminderDate;
-    if (_reminderTime != null) {
-      final now = DateTime.now();
-      reminderDate = DateTime(now.year, now.month, now.day, _reminderTime!.hour, _reminderTime!.minute);
-    }
+    final now = DateTime.now();
+    final reminderDate = _reminderTime != null
+        ? DateTime(now.year, now.month, now.day, _reminderTime!.hour, _reminderTime!.minute)
+        : null;
 
     final markerColor = _markerColors[_selectedMarker ?? _customMarkers.first] ?? Colors.grey;
 
-    final int? targetDays = int.tryParse(_targetDays ?? '');
+    final targetValue = int.tryParse(_targetDays ?? '');
 
     final newHabit = Habit(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: now.millisecondsSinceEpoch.toString(),
       name: _habitNameController.text.trim(),
       reminderTime: reminderDate,
-      targetDays: targetDays != null && targetDays > 0 ? targetDays : null,
+      targetDays: (targetValue != null && targetValue > 0) ? targetValue : null,
       iconName: (_selectedIcon ?? _habitIcons.first).codePoint.toString(),
       iconColorHex: _selectedColor ?? _iconColors.first,
       markerIcon: (_selectedMarker ?? _customMarkers.first).codePoint.toString(),
@@ -159,7 +157,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   Color _colorFromHex(String hex) {
     final buffer = StringBuffer();
-    if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+    if (hex.length == 6) buffer.write('ff');
     buffer.write(hex.replaceFirst('#', ''));
     return Color(int.parse(buffer.toString(), radix: 16));
   }
@@ -410,4 +408,17 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       ),
     );
   }
+}
+
+
+class _HabitProgress {
+  final Habit habit;
+  final double percent;
+  final int completedDays;
+
+  _HabitProgress({
+    required this.habit,
+    required this.percent,
+    required this.completedDays,
+  });
 }
