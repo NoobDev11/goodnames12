@@ -56,10 +56,12 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
 
     habit_model.Habit? habit;
     if (_selectedHabitId != null && _selectedHabitId!.isNotEmpty) {
-      habit = habits.firstWhere(
-        (h) => h.id == _selectedHabitId,
-        orElse: () => habits.isNotEmpty ? habits.first : null,
-      );
+      habit = habits.isNotEmpty
+          ? habits.firstWhere(
+              (h) => h.id == _selectedHabitId,
+              orElse: () => habits.first,
+            )
+          : null;
     } else {
       habit = habits.isNotEmpty ? habits.first : null;
     }
@@ -182,7 +184,7 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
                           Padding(
                             padding: const EdgeInsets.only(bottom: 6.0),
                             child: Image.asset(
-                              achievement.medalIconAsset,
+                              achievement.medalAsset,
                               width: 36,
                               height: 36,
                               color: isAchieved ? null : Colors.black26,
