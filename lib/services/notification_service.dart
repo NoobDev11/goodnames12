@@ -28,14 +28,14 @@ class NotificationService {
     DateTime scheduledTime, {
     bool recurringDaily = false,
   }) async {
-    final tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
+    final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
       tzScheduled,
-      NotificationDetails(
+      const NotificationDetails(
         android: AndroidNotificationDetails(
           'habit_channel',
           'Habit Notifications',
@@ -46,7 +46,6 @@ class NotificationService {
       ),
       androidAllowWhileIdle: true,
       matchDateTimeComponents: recurringDaily ? DateTimeComponents.time : null,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
