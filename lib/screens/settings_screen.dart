@@ -22,10 +22,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final habitProvider = context.read<HabitProvider>();
     final dataService = DataService(habitProvider, settings);
 
-    Future<void> onNotificationToggle(bool value) async {
+    Future<void> onToggleNotifications(bool value) async {
       if (value) {
-        final permissionStatus = await Permission.notification.request();
-        if (!permissionStatus.isGranted) {
+        final status = await Permission.notification.request();
+        if (!status.isGranted) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Notification permission denied')),
@@ -36,14 +36,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       if (!mounted) return;
       settings.setNotificationsEnabled(value);
-      // TODO: Add notification schedule/unschedule logic
+      // TODO: Add schedule/ cancel notification logic
     }
 
-    void onDarkModeToggle(bool value) {
+    void onToggleDarkMode(bool value) {
       settings.setDarkModeEnabled(value);
     }
 
-    Future<void> onImport() async {
+    Future<void> onImportData() async {
       try {
         final result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
@@ -55,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           await dataService.importFromFile(file);
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Imported data from: ${file.path}')),
+            SnackBar(content: Text('Imported from: ${file.path}')),
           );
         }
       } catch (e) {
@@ -66,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     }
 
-    Future<void> onExport() async {
+    Future<void> onExportData() async {
       try {
         final status = await Permission.storage.request();
         if (!status.isGranted) {
@@ -77,36 +77,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
           return;
         }
-
         final directory = await getExternalStorageDirectory();
         if (directory == null) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Unable to access storage directory')),
+              const SnackBar(content: Text('Unable to access storage')),
             );
           }
           return;
         }
-
         final path = directory.path;
-        final fileName = 'habits_export_${DateTime.now().millisecondsSinceEpoch}.json';
-        final filePath = '$path/$fileName';
-
-        final json = dataService.prepareJsonExport();
-        final file = File(filePath);
-        await file.writeAsString(json);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Exported data to: $filePath')),
-          );
-        }
+        final filename = 'habits_export_${DateTime.now().millisecondsSinceEpoch}.json';
+        final file = File('$path/$filename');
+        final jsonString = dataService.prepareJsonExport();
+        await file.writeAsString(jsonString);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Exported to: ${file.path}')),
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to export data: $e')),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
       }
     }
 
@@ -118,38 +111,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('App Preferences',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('App Preferences', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text('Notifications'),
             value: settings.notificationsEnabled,
-            onChanged: onNotificationToggle,
+            onChanged: onToggleNotifications,
             secondary: const Icon(Icons.notifications),
           ),
           SwitchListTile(
             title: const Text('Dark Mode'),
             value: settings.darkModeEnabled,
-            onChanged: onDarkModeToggle,
+            onChanged: onToggleDarkMode,
             secondary: const Icon(Icons.dark_mode),
           ),
           const SizedBox(height: 24),
-          const Text('Data Management',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Data Management', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ListTile(
             leading: const Icon(Icons.download),
             title: const Text('Import Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: onImport,
+            onTap: onImportData,
           ),
           ListTile(
             leading: const Icon(Icons.upload),
             title: const Text('Export Data'),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: onExport,
+            onTap: onExportData,
           ),
           const SizedBox(height: 24),
-          const Text('About',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
