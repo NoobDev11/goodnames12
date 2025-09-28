@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/habit.dart';  // Removed extra space here
+import '../models/habit.dart';
 import '../providers/habit_provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
@@ -49,7 +49,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6b4a99', // fixed typo from previous e.g. 6b4b99
+    '#6b9959',
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -57,50 +57,49 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#950952',
     '#645830',
     '#da6278',
-    '#f06449',
     '#907ad6',
   ];
 
   final _customMarkers = [
     Icons.check_circle_rounded,
-    Icons.arrow_circle_up_rounded,
-    Icons.arrow_circle_down_rounded,
-    Icons.build_circle_rounded,
-    Icons.pause_circle_filled_rounded,
-    Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded,
-    Icons.clear_rounded,
-    Icons.star_rounded,
-    Icons.stars_rounded,
-    Icons.diamond_rounded,
+    Icons.arrow_upward,
+    Icons.arrow_downward,
+    Icons.build_circle,
+    Icons.pause_circle_filled,
+    Icons.play_circle_filled,
+    Icons.swap_horiz,
+    Icons.clear,
+    Icons.star,
+    Icons.stars,
+    Icons.diamond,
     Icons.card_giftcard,
-    Icons.alternate_email_rounded,
-    Icons.amp_stories_rounded,
-    Icons.anchor_rounded,
+    Icons.alternate_email,
+    Icons.amp_stories,
+    Icons.anchor,
     Icons.assistant_navigation,
-    Icons.auto_awesome_rounded,
-    Icons.block_rounded,
+    Icons.auto_awesome,
+    Icons.block,
   ];
 
-  final _markerColors = {
+  final Map<IconData, Color> _markerColors = {
     Icons.check_circle_rounded: Colors.green,
-    Icons.arrow_circle_up_rounded: Colors.blue,
-    Icons.arrow_circle_down_rounded: Colors.blue,
-    Icons.build_circle_rounded: Colors.orange,
-    Icons.pause_circle_filled_rounded: Colors.yellow,
-    Icons.play_circle_filled_rounded: Colors.green,
-    Icons.swap_horizontal_circle_rounded: Colors.teal,
-    Icons.clear_rounded: Colors.amber,
-    Icons.star_rounded: Colors.teal,
-    Icons.stars_rounded: Colors.red,
-    Icons.diamond_rounded: Colors.purple,
+    Icons.arrow_upward: Colors.blue,
+    Icons.arrow_downward: Colors.blue,
+    Icons.build_circle: Colors.orange,
+    Icons.pause_circle_filled: Colors.yellow,
+    Icons.play_circle_filled: Colors.green,
+    Icons.swap_horiz: Colors.teal,
+    Icons.clear: Colors.amber,
+    Icons.star: Colors.teal,
+    Icons.stars: Colors.red,
+    Icons.diamond: Colors.purple,
     Icons.card_giftcard: Colors.orange,
-    Icons.alternate_email_rounded: Colors.blue,
-    Icons.amp_stories_rounded: Colors.green,
-    Icons.anchor_rounded: Colors.brown,
+    Icons.alternate_email: Colors.blue,
+    Icons.amp_stories: Colors.green,
+    Icons.anchor: Colors.brown,
     Icons.assistant_navigation: Colors.blue,
-    Icons.auto_awesome_rounded: Colors.blue,
-    Icons.block_rounded: Colors.red,
+    Icons.auto_awesome: Colors.blue,
+    Icons.block: Colors.red,
   };
 
   @override
@@ -118,27 +117,22 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
-  String colorToHex(Color color) {
-  final r = (color.r * 255).round() & 0xFF;
-  final g = (color.g * 255).round() & 0xFF;
-  final b = (color.b * 255).round() & 0xFF;
-  return '#'
-      '${r.toRadixString(16).padLeft(2, '0')}'
-      '${g.toRadixString(16).padLeft(2, '0')}'
-      '${b.toRadixString(16).padLeft(2, '0')}';
-}
+  String _colorToHex(Color color) {
+    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
+        '${color.green.toRadixString(16).padLeft(2, '0')}'
+        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+  }
 
-  void _onAddHabit() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  void _onAdd() {
+    if (!_formKey.currentState!.validate()) return;
 
     final now = DateTime.now();
     final reminderDate = _reminderTime != null
         ? DateTime(now.year, now.month, now.day, _reminderTime!.hour, _reminderTime!.minute)
         : null;
 
-    final markerColor = _markerColors[_selectedMarker ?? _customMarkers.first] ?? Colors.grey;
+    final marker = _selectedMarker ?? _customMarkers.first;
+    final markerColor = _markerColors[marker] ?? Colors.grey;
 
     final targetValue = int.tryParse(_targetDays ?? '');
 
@@ -149,7 +143,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       targetDays: (targetValue != null && targetValue > 0) ? targetValue : null,
       iconName: (_selectedIcon ?? _habitIcons.first).codePoint.toString(),
       iconColorHex: _selectedColor ?? _iconColors.first,
-      markerIcon: (_selectedMarker ?? _customMarkers.first).codePoint.toString(),
+      markerIcon: marker.codePoint.toString(),
       markerColorHex: _colorToHex(markerColor),
     );
 
@@ -287,7 +281,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _onAddHabit,
+                        onPressed: _onAdd,
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                           backgroundColor: Colors.deepPurple.shade300,
@@ -412,16 +406,4 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       ),
     );
   }
-}
-
-class _HabitProgress {
-  final Habit habit;
-  final double percent;
-  final int completedDays;
-
-  _HabitProgress({
-    required this.habit,
-    required this.percent,
-    required this.completedDays,
-  });
 }
