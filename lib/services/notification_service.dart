@@ -1,6 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -19,7 +19,16 @@ class NotificationService {
 
     const initSettings = InitializationSettings(android: androidSettings);
 
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        // handle tap on notification here
+      },
+      onDidReceiveBackgroundNotificationResponse:
+          (NotificationResponse response) {
+        // handle background tap here
+      },
+    );
   }
 
   Future<void> scheduleNotification(
@@ -29,7 +38,8 @@ class NotificationService {
     DateTime scheduledTime, {
     bool recurringDaily = false,
   }) async {
-    final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
+    final tz.TZDateTime tzScheduled =
+        tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
@@ -45,8 +55,8 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
-      androidAllowWhileIdle: true,
-      // Removed deprecated androidScheduleMode and androidAllowWhileIdle fixed in plugin version
+      // ✅ updated for v19.4.2
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents:
           recurringDaily ? DateTimeComponents.time : null,
       uiLocalNotificationDateInterpretation:
