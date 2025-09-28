@@ -34,21 +34,27 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabits() async {
-    final jsonString = await LocalStorage().getString('habits');
+    final jsonString = await LocalStorage().getInstance().getString('habits');
     if (jsonString != null) {
       try {
         List<dynamic> jsonList = jsonDecode(jsonString);
-        _habits = jsonList.map((json) => Habit.fromJson(json)).toList();
+        _habits = jsonList.map((json) {
+          final parsedHabit = Habit.fromJson(json);
+          if (parsedHabit.achievements != null) {
+            final achievementsJson = json['achievements'] as List<dynamic>;
+            final achievements = achievementsJson
+                .map((e) => achievement_model.Achievement.fromJson(e))
+                .toList();
+            return parsedHabit.copyWith(achievements: achievements);
+          } else {
+            return parsedHabit;
+          }
+        }).toList();
 
         for (int i = 0; i < _habits.length; i++) {
-          // Convert dynamic list to a strongly-typed achievements list
-          if (_habits[i].achievements == null ||
-              (_habits[i].achievements != null &&
-                  _habits[i].achievements!.isNotEmpty &&
-                  _habits[i].achievements![0] is Map)) {
-            final target = _habits[i].targetDays;
+          if (_habits[i].achievements == null) {
             _habits[i] = _habits[i].copyWith(
-                achievements: _initDefaultAchievements(target));
+                achievements: _initDefaultAchievements(_habits[i].targetDays));
             await _scheduleNotificationForHabit(_habits[i]);
           }
         }
@@ -62,7 +68,7 @@ class HabitProvider extends ChangeNotifier {
   Future<void> _saveHabits() async {
     final jsonList = _habits.map((h) => h.toJson()).toList();
     final jsonString = jsonEncode(jsonList);
-    await LocalStorage().setString('habits', jsonString);
+    await LocalStorage().getInstance().setString('habits', jsonString);
   }
 
   Future<void> addHabit(Habit habit) async {
@@ -102,10 +108,10 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabitToday() async {
-    final jsonString = await LocalStorage().getString('habitCompletedToday');
+    final jsonString = await LocalStorage().getInstance().getString('habitCompletedToday');
     if (jsonString != null) {
       try {
-        final Map<String, dynamic> map = jsonDecode(jsonString);
+        final map = jsonDecode(jsonString) as Map<String, dynamic>;
         _habitCompletedToday.clear();
         map.forEach((key, value) {
           _habitCompletedToday[key] = value as bool;
@@ -118,12 +124,12 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _saveHabitToday() async {
-    await LocalStorage().setString(
-        'habitCompletedToday', jsonEncode(_habitCompletedToday));
+    final jsonString = jsonEncode(_habitCompletedToday);
+    await LocalStorage().getInstance().setString('habitCompletedToday', jsonString);
   }
 
   void toggleHabitCompleted(String id) {
-    bool isCompleted = _habitCompletedToday[id] ?? false;
+    final isCompleted = _habitCompletedToday[id] ?? false;
     _habitCompletedToday[id] = !isCompleted;
     _saveHabitToday();
     notifyListeners();
@@ -132,10 +138,10 @@ class HabitProvider extends ChangeNotifier {
       statsProvider.markDone(id, DateTime.now(), !isCompleted);
     }
 
-    Habit? habit = getHabitById(id);
+    final habit = getHabitById(id);
     if (habit != null) {
       bool updated = false;
-      for (var achievement in habit.achievements ?? []) {
+      for (final achievement in habit.achievements ?? []) {
         if (!achievement.achieved) {
           if (statsProvider.currentStreak != null &&
               statsProvider.currentStreak(id) >= achievement.days) {
@@ -151,7 +157,7 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> saveAchievements(Habit habit) async {
-    int idx = _habits.indexWhere((h) => h.id == habit.id);
+    final idx = _habits.indexWhere((h) => h.id == habit.id);
     if (idx != -1) {
       _habits[idx] = habit;
       await _saveHabits();
@@ -169,8 +175,8 @@ class HabitProvider extends ChangeNotifier {
       return;
     }
     final now = DateTime.now();
-    var scheduledTime = DateTime(now.year, now.month, now.day, habit.reminderTime!.hour,
-        habit.reminderTime!.minute);
+    var scheduledTime = DateTime(
+        now.year, now.month, now.day, habit.reminderTime!.hour, habit.reminderTime!.minute);
     if (scheduledTime.isBefore(now)) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
@@ -183,75 +189,115 @@ class HabitProvider extends ChangeNotifier {
   }
 
   List<achievement_model.Achievement> _initDefaultAchievements(int? customTarget) {
-    List<achievement_model.Achievement> milestones = [
+    final milestones = <achievement_model.Achievement>[
       achievement_model.Achievement(
-          days: 3,
-          points: 5,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_3_days.png'),
+        id: '1',
+        habitId: '',
+        title: '3 Days',
+        days: 3,
+        points: 5,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_3_days.png',
+      ),
       achievement_model.Achievement(
-          days: 7,
-          points: 10,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_7_days.png'),
+        id: '2',
+        habitId: '',
+        title: '7 Days',
+        days: 7,
+        points: 10,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_7_days.png',
+      ),
       achievement_model.Achievement(
-          days: 15,
-          points: 15,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_15_days.png'),
+        id: '3',
+        habitId: '',
+        title: '15 Days',
+        days: 15,
+        points: 15,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_15_days.png',
+      ),
       achievement_model.Achievement(
-          days: 30,
-          points: 20,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_30_days.png'),
+        id: '4',
+        habitId: '',
+        title: '30 Days',
+        days: 30,
+        points: 20,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_30_days.png',
+      ),
       achievement_model.Achievement(
-          days: 60,
-          points: 30,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_60_days.png'),
+        id: '5',
+        habitId: '',
+        title: '60 Days',
+        days: 60,
+        points: 30,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_60_days.png',
+      ),
       achievement_model.Achievement(
-          days: 90,
-          points: 50,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_90_days.png'),
+        id: '6',
+        habitId: '',
+        title: '90 Days',
+        days: 90,
+        points: 50,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_90_days.png',
+      ),
       achievement_model.Achievement(
-          days: 180,
-          points: 75,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_180_days.png'),
+        id: '7',
+        habitId: '',
+        title: '180 Days',
+        days: 180,
+        points: 75,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_180_days.png',
+      ),
       achievement_model.Achievement(
-          days: 365,
-          points: 100,
-          achieved: false,
-          medalIconAsset: 'assets/icon/medal_365_days.png'),
+        id: '8',
+        habitId: '',
+        title: '365 Days',
+        days: 365,
+        points: 100,
+        achieved: false,
+        medalIconAsset: 'assets/icon/medal_365_days.png',
+      ),
     ];
+
     if (customTarget != null && customTarget > 0) {
       milestones.add(achievement_model.Achievement(
+        id: 'custom',
+        habitId: '',
+        title: 'Custom Target',
         days: customTarget,
         points: 0,
         achieved: false,
-        label: 'Custom Target',
         medalIconAsset: 'assets/icon/medal_custom_days.png',
       ));
     } else {
       milestones.add(achievement_model.Achievement(
+        id: 'custom_placeholder',
+        habitId: '',
+        title: 'Custom Target Placeholder',
         days: 9999,
         points: 0,
         achieved: false,
-        label: 'Custom Target Placeholder',
         medalIconAsset: 'assets/icon/medal_custom_days.png',
       ));
     }
+
     return milestones;
   }
+}
 
-  Future<void> importHabits(List<Habit> importedHabits) async {
-    _habits = importedHabits;
-    await _saveHabits();
-    notifyListeners();
-  }
+class _HabitProgress {
+  final Habit habit;
+  final double percent;
+  final int completedDays;
 
-  String generateJsonExport() {
-    return jsonEncode(_habits.map((h) => h.toJson()).toList());
-  }
+  _HabitProgress({
+    required this.habit,
+    required this.percent,
+    required this.completedDays,
+  });
 }
