@@ -11,8 +11,8 @@ class DataService {
 
   DataService(this.habitProvider, this.settingsProvider);
 
-  /// Exports habits and settings data as JSON string
-  String prepareExportJson() {
+  /// Exports habits and settings data as JSON string asynchronously
+  Future<String> prepareJsonExport() async {
     final habitListJson = habitProvider.habits.map((h) => h.toJson()).toList();
     final settingsJson = {
       'notificationsEnabled': settingsProvider.notificationsEnabled,
@@ -51,10 +51,10 @@ class DataService {
     if (jsonData.containsKey('settings')) {
       final settingsJson = jsonData['settings'];
       if (settingsJson.containsKey('notificationsEnabled')) {
-        settingsProvider.setNotificationsEnabled(settingsJson['notificationsEnabled'] as bool);
+        await settingsProvider.setNotificationsEnabled(settingsJson['notificationsEnabled'] as bool);
       }
       if (settingsJson.containsKey('darkMode')) {
-        settingsProvider.setDarkMode(settingsJson['darkMode'] as bool);
+        await settingsProvider.setDarkModeEnabled(settingsJson['darkMode'] as bool);
       }
     }
   }
