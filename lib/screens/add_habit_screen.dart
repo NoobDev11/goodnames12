@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/ habit.dart';
+import '../models/habit.dart';  // Removed extra space here
 import '../providers/habit_provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
@@ -68,7 +68,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.build_circle_rounded,
     Icons.pause_circle_filled_rounded,
     Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded, // corrected icon name here
+    Icons.swap_horizontal_circle_rounded,
     Icons.clear_rounded,
     Icons.star_rounded,
     Icons.stars_rounded,
@@ -118,15 +118,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
- String colorToHex(Color color) {
-  final r = (color.r * 255).round() & 0xFF;
-  final g = (color.g * 255).round() & 0xFF;
-  final b = (color.b * 255).round() & 0xFF;
-  return '#'
-      '${r.toRadixString(16).padLeft(2, '0')}'
-      '${g.toRadixString(16).padLeft(2, '0')}'
-      '${b.toRadixString(16).padLeft(2, '0')}';
-}
+  String _colorToHex(Color color) {
+    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
+        '${color.green.toRadixString(16).padLeft(2, '0')}'
+        '${color.blue.toRadixString(16).padLeft(2, '0')}';
+  }
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) {
@@ -413,7 +409,6 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     );
   }
 }
-
 
 class _HabitProgress {
   final Habit habit;
