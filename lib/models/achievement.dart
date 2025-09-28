@@ -1,3 +1,4 @@
+// lib/models/achievement.dart
 class Achievement {
   final String id;
   final String habitId;
@@ -5,7 +6,7 @@ class Achievement {
   final int requiredStreak;
   final int points;
   bool achieved;
-  final String medalIconAsset;
+  final String medalAsset; // kept name `medalAsset` to match usages across project
 
   Achievement({
     required this.id,
@@ -14,7 +15,7 @@ class Achievement {
     required this.requiredStreak,
     required this.points,
     this.achieved = false,
-    this.medalIconAsset = '',
+    required this.medalAsset,
   });
 
   Achievement copyWith({
@@ -24,7 +25,7 @@ class Achievement {
     int? requiredStreak,
     int? points,
     bool? achieved,
-    String? medalIconAsset,
+    String? medalAsset,
   }) {
     return Achievement(
       id: id ?? this.id,
@@ -33,19 +34,25 @@ class Achievement {
       requiredStreak: requiredStreak ?? this.requiredStreak,
       points: points ?? this.points,
       achieved: achieved ?? this.achieved,
-      medalIconAsset: medalIconAsset ?? this.medalIconAsset,
+      medalAsset: medalAsset ?? this.medalAsset,
     );
   }
 
   factory Achievement.fromJson(Map<String, dynamic> json) {
     return Achievement(
-      id: json['id'] as String,
-      habitId: json['habitId'] as String,
-      title: json['title'] as String,
-      requiredStreak: json['requiredStreak'] as int,
-      points: json['points'] as int,
-      achieved: json['achieved'] as bool? ?? false,
-      medalIconAsset: json['medalIconAsset'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      habitId: json['habitId']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      requiredStreak: (json['requiredStreak'] is int)
+          ? json['requiredStreak'] as int
+          : int.tryParse(json['requiredStreak']?.toString() ?? '0') ?? 0,
+      points: (json['points'] is int)
+          ? json['points'] as int
+          : int.tryParse(json['points']?.toString() ?? '0') ?? 0,
+      achieved: json['achieved'] == true,
+      medalAsset: json['medalAsset']?.toString() ??
+          json['medalIconAsset']?.toString() ??
+          '',
     );
   }
 
@@ -57,7 +64,7 @@ class Achievement {
       'requiredStreak': requiredStreak,
       'points': points,
       'achieved': achieved,
-      'medalIconAsset': medalIconAsset,
+      'medalAsset': medalAsset,
     };
   }
 }
