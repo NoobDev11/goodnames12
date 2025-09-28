@@ -34,7 +34,7 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabits() async {
-    final jsonString = await LocalStorage().getInstance().getString('habits');
+    final jsonString = await LocalStorage.instance.getString('habits');
     if (jsonString != null) {
       try {
         List<dynamic> jsonList = jsonDecode(jsonString);
@@ -68,7 +68,7 @@ class HabitProvider extends ChangeNotifier {
   Future<void> _saveHabits() async {
     final jsonList = _habits.map((h) => h.toJson()).toList();
     final jsonString = jsonEncode(jsonList);
-    await LocalStorage().getInstance().setString('habits', jsonString);
+    await LocalStorage.instance.setString('habits', jsonString);
   }
 
   Future<void> addHabit(Habit habit) async {
@@ -108,7 +108,8 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabitToday() async {
-    final jsonString = await LocalStorage().getInstance().getString('habitCompletedToday');
+    final jsonString =
+        await LocalStorage.instance.getString('habitCompletedToday');
     if (jsonString != null) {
       try {
         final map = jsonDecode(jsonString) as Map<String, dynamic>;
@@ -125,7 +126,7 @@ class HabitProvider extends ChangeNotifier {
 
   Future<void> _saveHabitToday() async {
     final jsonString = jsonEncode(_habitCompletedToday);
-    await LocalStorage().getInstance().setString('habitCompletedToday', jsonString);
+    await LocalStorage.instance.setString('habitCompletedToday', jsonString);
   }
 
   void toggleHabitCompleted(String id) {
@@ -135,23 +136,28 @@ class HabitProvider extends ChangeNotifier {
     notifyListeners();
 
     if (statsProvider.markDone != null) {
-      statsProvider.markDone(id, DateTime.now(), !isCompleted);
+      statsProvider.markDone!(id, DateTime.now(), !isCompleted);
     }
 
     final habit = getHabitById(id);
     if (habit != null) {
       bool updated = false;
-      for (final achievement in habit.achievements ?? []) {
+      // need to copy achievements to mutate them safely
+      List<achievement_model.Achievement> updatedAchievements =
+          habit.achievements?.map((a) => a.copyWith()).toList() ?? [];
+
+      for (final achievement in updatedAchievements) {
         if (!achievement.achieved) {
           if (statsProvider.currentStreak != null &&
-              statsProvider.currentStreak(id) >= achievement.days) {
+              statsProvider.currentStreak!(id) >= achievement.requiredStreak) {
             achievement.achieved = true;
             updated = true;
           }
         }
       }
       if (updated) {
-        saveAchievements(habit);
+        final updatedHabit = habit.copyWith(achievements: updatedAchievements);
+        saveAchievements(updatedHabit);
       }
     }
   }
@@ -175,8 +181,8 @@ class HabitProvider extends ChangeNotifier {
       return;
     }
     final now = DateTime.now();
-    var scheduledTime = DateTime(
-        now.year, now.month, now.day, habit.reminderTime!.hour, habit.reminderTime!.minute);
+    var scheduledTime = DateTime(now.year, now.month, now.day,
+        habit.reminderTime!.hour, habit.reminderTime!.minute);
     if (scheduledTime.isBefore(now)) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
@@ -194,7 +200,7 @@ class HabitProvider extends ChangeNotifier {
         id: '1',
         habitId: '',
         title: '3 Days',
-        days: 3,
+        requiredStreak: 3,
         points: 5,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_3_days.png',
@@ -203,7 +209,7 @@ class HabitProvider extends ChangeNotifier {
         id: '2',
         habitId: '',
         title: '7 Days',
-        days: 7,
+        requiredStreak: 7,
         points: 10,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_7_days.png',
@@ -212,7 +218,7 @@ class HabitProvider extends ChangeNotifier {
         id: '3',
         habitId: '',
         title: '15 Days',
-        days: 15,
+        requiredStreak: 15,
         points: 15,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_15_days.png',
@@ -221,7 +227,7 @@ class HabitProvider extends ChangeNotifier {
         id: '4',
         habitId: '',
         title: '30 Days',
-        days: 30,
+        requiredStreak: 30,
         points: 20,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_30_days.png',
@@ -230,7 +236,7 @@ class HabitProvider extends ChangeNotifier {
         id: '5',
         habitId: '',
         title: '60 Days',
-        days: 60,
+        requiredStreak: 60,
         points: 30,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_60_days.png',
@@ -239,7 +245,7 @@ class HabitProvider extends ChangeNotifier {
         id: '6',
         habitId: '',
         title: '90 Days',
-        days: 90,
+        requiredStreak: 90,
         points: 50,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_90_days.png',
@@ -248,7 +254,7 @@ class HabitProvider extends ChangeNotifier {
         id: '7',
         habitId: '',
         title: '180 Days',
-        days: 180,
+        requiredStreak: 180,
         points: 75,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_180_days.png',
@@ -257,7 +263,7 @@ class HabitProvider extends ChangeNotifier {
         id: '8',
         habitId: '',
         title: '365 Days',
-        days: 365,
+        requiredStreak: 365,
         points: 100,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_365_days.png',
@@ -269,7 +275,7 @@ class HabitProvider extends ChangeNotifier {
         id: 'custom',
         habitId: '',
         title: 'Custom Target',
-        days: customTarget,
+        requiredStreak: customTarget,
         points: 0,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_custom_days.png',
@@ -279,7 +285,7 @@ class HabitProvider extends ChangeNotifier {
         id: 'custom_placeholder',
         habitId: '',
         title: 'Custom Target Placeholder',
-        days: 9999,
+        requiredStreak: 9999,
         points: 0,
         achieved: false,
         medalIconAsset: 'assets/icon/medal_custom_days.png',
