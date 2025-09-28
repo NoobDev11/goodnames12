@@ -35,8 +35,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
       if (!mounted) return;
-      settings.setNotificationsEnabled(value);
-      // TODO: Add schedule/ cancel notification logic
+      await settings.setNotificationsEnabled(value);
+      // Add schedule/ cancel notification logic in SettingsProvider as needed
     }
 
     void onToggleDarkMode(bool value) {
@@ -89,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final path = directory.path;
         final filename = 'habits_export_${DateTime.now().millisecondsSinceEpoch}.json';
         final file = File('$path/$filename');
-        final jsonString = dataService.prepareJsonExport();
+        final jsonString = await dataService.prepareJsonExport();
         await file.writeAsString(jsonString);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
