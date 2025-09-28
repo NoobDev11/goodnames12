@@ -1,50 +1,16 @@
-class Achievement {
-  final int days;
-  final int points;
-  bool achieved;
-  final String? label;
-  final String medalIconAsset;
-
-  Achievement({
-    required this.days,
-    required this.points,
-    this.achieved = false,
-    this.label,
-    required this.medalIconAsset,
-  });
-
-  factory Achievement.fromJson(Map<String, dynamic> json) {
-    return Achievement(
-      days: json['days'] as int,
-      points: json['points'] as int,
-      achieved: json['achieved'] as bool,
-      label: json['label'] as String?,
-      medalIconAsset: json['medalIconAsset'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'days': days,
-      'points': points,
-      'achieved': achieved,
-      'label': label,
-      'medalIconAsset': medalIconAsset,
-    };
-  }
-}
+// lib/models/habit.dart
+import 'achievement.dart';
 
 class Habit {
   final String id;
   final String name;
-  final String iconName; // Identifier for habit icon
+  final String iconName;
   final String iconColorHex;
-  final String markerIcon; // Custom marker name or codepoint
+  final String markerIcon;
   final String markerColorHex;
   final DateTime? reminderTime;
-  final int? targetDays; // optional target streak
+  final int targetDays;
   final bool notificationsEnabled;
-
   final List<Achievement>? achievements;
 
   Habit({
@@ -55,7 +21,7 @@ class Habit {
     required this.markerIcon,
     required this.markerColorHex,
     this.reminderTime,
-    this.targetDays,
+    required this.targetDays,
     this.notificationsEnabled = true,
     this.achievements,
   });
@@ -87,21 +53,34 @@ class Habit {
   }
 
   factory Habit.fromJson(Map<String, dynamic> json) {
+    final rem = json['reminderTime'];
+    DateTime? reminder;
+    if (rem != null && rem is String) {
+      reminder = DateTime.tryParse(rem);
+    }
+
+    List<Achievement>? ach;
+    if (json['achievements'] is Iterable) {
+      ach = (json['achievements'] as Iterable)
+          .map((e) => Achievement.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+    }
+
     return Habit(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      iconName: json['iconName'] as String,
-      iconColorHex: json['iconColorHex'] as String,
-      markerIcon: json['markerIcon'] as String,
-      markerColorHex: json['markerColorHex'] as String,
-      reminderTime: json['reminderTime'] != null ? DateTime.tryParse(json['reminderTime'] as String) : null,
-      targetDays: json['targetDays'] as int?,
-      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      achievements: json['achievements'] != null
-          ? (json['achievements'] as List<dynamic>)
-              .map((e) => Achievement.fromJson(e as Map<String, dynamic>))
-              .toList()
-          : null,
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      iconName: json['iconName']?.toString() ?? '',
+      iconColorHex: json['iconColorHex']?.toString() ?? '',
+      markerIcon: json['markerIcon']?.toString() ?? '',
+      markerColorHex: json['markerColorHex']?.toString() ?? '',
+      reminderTime: reminder,
+      targetDays: (json['targetDays'] is int)
+          ? json['targetDays'] as int
+          : int.tryParse(json['targetDays']?.toString() ?? '0') ?? 0,
+      notificationsEnabled: json['notificationsEnabled'] == null
+          ? true
+          : (json['notificationsEnabled'] == true),
+      achievements: ach,
     );
   }
 
