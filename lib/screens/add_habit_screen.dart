@@ -30,14 +30,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.bedtime_rounded,
     Icons.emoji_events,
     Icons.emoji_emotions,
-    Icons.water,
+    Icons.water_drop,
     Icons.local_fire_department,
     Icons.book,
     Icons.lightbulb,
-    Icons.apple,
+    Icons.apple_rounded,
     Icons.account_balance,
     Icons.account_balance_wallet,
-    Icons.bookmark,
+    Icons.bookmarks_rounded,
   ];
 
   final _iconColors = [
@@ -49,9 +49,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#8ac926',
     '#086375',
     '#1982c4',
-    '#6b49',
-    '#6b4978',
-    '#6b497f',
+    '#6b4a99', // fixed typo from previous e.g. 6b4b99
     '#69b578',
     '#ff6f91',
     '#028090',
@@ -59,48 +57,50 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     '#950952',
     '#645830',
     '#da6278',
+    '#f06449',
+    '#907ad6',
   ];
 
   final _customMarkers = [
-    Icons.check_circle,
-    Icons.arrow_upward,
-    Icons.arrow_downward,
-    Icons.build_circle,
-    Icons.pause,
-    Icons.play_arrow,
-    Icons.swap_horiz,
-    Icons.clear,
-    Icons.star,
-    Icons.stars,
-    Icons.diamond,
+    Icons.check_circle_rounded,
+    Icons.arrow_circle_up_rounded,
+    Icons.arrow_circle_down_rounded,
+    Icons.build_circle_rounded,
+    Icons.pause_circle_filled_rounded,
+    Icons.play_circle_filled_rounded,
+    Icons.swap_horizontal_circle_rounded, // corrected icon name here
+    Icons.clear_rounded,
+    Icons.star_rounded,
+    Icons.stars_rounded,
+    Icons.diamond_rounded,
     Icons.card_giftcard,
-    Icons.alternate_email,
-    Icons.amp_stories,
-    Icons.anchor,
+    Icons.alternate_email_rounded,
+    Icons.amp_stories_rounded,
+    Icons.anchor_rounded,
     Icons.assistant_navigation,
-    Icons.auto_awesome,
-    Icons.block,
+    Icons.auto_awesome_rounded,
+    Icons.block_rounded,
   ];
 
   final _markerColors = {
-    Icons.check_circle: Colors.green,
-    Icons.arrow_upward: Colors.blue,
-    Icons.arrow_downward: Colors.blue,
-    Icons.build_circle: Colors.orange,
-    Icons.pause: Colors.yellow,
-    Icons.play_arrow: Colors.green,
-    Icons.swap_horiz: Colors.teal,
-    Icons.clear: Colors.amber,
-    Icons.star: Colors.teal,
-    Icons.stars: Colors.red,
-    Icons.diamond: Colors.purple,
+    Icons.check_circle_rounded: Colors.green,
+    Icons.arrow_circle_up_rounded: Colors.blue,
+    Icons.arrow_circle_down_rounded: Colors.blue,
+    Icons.build_circle_rounded: Colors.orange,
+    Icons.pause_circle_filled_rounded: Colors.yellow,
+    Icons.play_circle_filled_rounded: Colors.green,
+    Icons.swap_horizontal_circle_rounded: Colors.teal,
+    Icons.clear_rounded: Colors.amber,
+    Icons.star_rounded: Colors.teal,
+    Icons.stars_rounded: Colors.red,
+    Icons.diamond_rounded: Colors.purple,
     Icons.card_giftcard: Colors.orange,
-    Icons.alternate_email: Colors.blue,
-    Icons.amp_stories: Colors.green,
-    Icons.anchor: Colors.brown,
+    Icons.alternate_email_rounded: Colors.blue,
+    Icons.amp_stories_rounded: Colors.green,
+    Icons.anchor_rounded: Colors.brown,
     Icons.assistant_navigation: Colors.blue,
-    Icons.auto_awesome: Colors.blue,
-    Icons.block: Colors.red,
+    Icons.auto_awesome_rounded: Colors.blue,
+    Icons.block_rounded: Colors.red,
   };
 
   @override
@@ -118,11 +118,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
-  String _colorToHex(Color color) {
-    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
-           '${color.green.toRadixString(16).padLeft(2, '0')}'
-           '${color.blue.toRadixString(16).padLeft(2, '0')}';
-  }
+ String colorToHex(Color color) {
+  final r = (color.r * 255).round() & 0xFF;
+  final g = (color.g * 255).round() & 0xFF;
+  final b = (color.b * 255).round() & 0xFF;
+  return '#'
+      '${r.toRadixString(16).padLeft(2, '0')}'
+      '${g.toRadixString(16).padLeft(2, '0')}'
+      '${b.toRadixString(16).padLeft(2, '0')}';
+}
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) {
