@@ -11,8 +11,7 @@ class AchievementScreen extends StatefulWidget {
   State<AchievementScreen> createState() => _AchievementScreenState();
 }
 
-class _AchievementScreenState extends State<AchievementScreen>
-    with SingleTickerProviderStateMixin {
+class _AchievementScreenState extends State<AchievementScreen> with SingleTickerProviderStateMixin {
   String? _selectedHabitId;
 
   late AnimationController _controller;
@@ -43,22 +42,24 @@ class _AchievementScreenState extends State<AchievementScreen>
   }
 
   int _calculateTotalPoints(List<achievement_model.Achievement> achievements) {
-    return achievements.where((a) => a.achieved == true).fold(0, (sum, a) => sum + a.points);
+    return achievements.where((a) => a.achieved).fold(0, (sum, a) => sum + a.points);
   }
 
   int _calculateMedalsEarned(List<achievement_model.Achievement> achievements) {
-    return achievements.where((a) => a.achieved == true).length;
+    return achievements.where((a) => a.achieved).length;
   }
 
   @override
   Widget build(BuildContext context) {
-    var habitProvider = context.watch<habit_provider.HabitProvider>();
-    var habits = habitProvider.habits;
+    final habitProvider = context.watch<habit_provider.HabitProvider>();
+    final habits = habitProvider.habits;
 
     habit_model.Habit? habit;
     if (_selectedHabitId != null && _selectedHabitId!.isNotEmpty) {
-      habit = habits.firstWhere((h) => h.id == _selectedHabitId,
-          orElse: () => habits.isNotEmpty ? habits.first : null);
+      habit = habits.firstWhere(
+        (h) => h.id == _selectedHabitId,
+        orElse: () => habits.isNotEmpty ? habits.first : null,
+      );
     } else {
       habit = habits.isNotEmpty ? habits.first : null;
     }
@@ -69,9 +70,9 @@ class _AchievementScreenState extends State<AchievementScreen>
       );
     }
 
-    var habitAchievements = _getAchievementsForHabit(habit);
-    var totalPoints = _calculateTotalPoints(habitAchievements);
-    var medalsEarned = _calculateMedalsEarned(habitAchievements);
+    final achievements = _getAchievementsForHabit(habit);
+    final totalPoints = _calculateTotalPoints(achievements);
+    final medalsEarned = _calculateMedalsEarned(achievements);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,8 +83,7 @@ class _AchievementScreenState extends State<AchievementScreen>
         children: [
           Card(
             margin: const EdgeInsets.all(16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -94,20 +94,17 @@ class _AchievementScreenState extends State<AchievementScreen>
                       const Icon(Icons.star, size: 48, color: Colors.amber),
                       Text(
                         '$totalPoints',
-                        style: const TextStyle(
-                            fontSize: 32, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                       const Text('Total Points'),
                     ],
                   ),
                   Column(
                     children: [
-                      const Icon(Icons.emoji_events,
-                          size: 48, color: Colors.orange),
+                      const Icon(Icons.emoji_events, size: 48, color: Colors.orange),
                       Text(
                         '$medalsEarned',
-                        style: const TextStyle(
-                            fontSize: 32, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                       const Text('Medals Earned'),
                     ],
@@ -123,9 +120,9 @@ class _AchievementScreenState extends State<AchievementScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: habits.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                var h = habits[index];
-                var isSelected = h.id == _selectedHabitId;
+              itemBuilder: (_, index) {
+                final h = habits[index];
+                final isSelected = h.id == _selectedHabitId;
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -135,8 +132,7 @@ class _AchievementScreenState extends State<AchievementScreen>
                     });
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected ? Colors.deepPurple : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(20),
@@ -144,8 +140,7 @@ class _AchievementScreenState extends State<AchievementScreen>
                     child: Center(
                       child: Text(
                         h.name,
-                        style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87),
+                        style: TextStyle(color: isSelected ? Colors.white : Colors.black87),
                       ),
                     ),
                   ),
@@ -159,14 +154,17 @@ class _AchievementScreenState extends State<AchievementScreen>
               opacity: _animation,
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: habitAchievements.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, mainAxisSpacing: 12, crossAxisSpacing: 12),
-                itemBuilder: (ctx, idx) {
-                  var achievement = habitAchievements[idx];
-                  var isAchieved = achievement.achieved;
-                  var label = achievement.label ?? '${achievement.days} Days';
-                  var points = achievement.points;
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                ),
+                itemCount: achievements.length,
+                itemBuilder: (ctx, index) {
+                  final achievement = achievements[index];
+                  final isAchieved = achievement.achieved;
+                  final label = achievement.title ?? '${achievement.days} Days';
+                  final points = achievement.points;
 
                   return Semantics(
                     label: 'Achievement: $label, $points points',
