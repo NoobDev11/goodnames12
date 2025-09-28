@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
-import '../models/achievement.dart' as achievement_model;
+import '../models/achievement.dart';
 import '../data/local_storage.dart';
 import 'habit_stats_provider.dart';
 import '../services/notification_service.dart';
@@ -40,19 +40,18 @@ class HabitProvider extends ChangeNotifier {
         List<dynamic> jsonList = jsonDecode(jsonString);
         _habits = jsonList.map((json) {
           final parsedHabit = Habit.fromJson(json);
-          if (parsedHabit.achievements != null) {
-            final achievementsJson = json['achievements'] as List<dynamic>;
-            final achievements = achievementsJson
-                .map((e) => achievement_model.Achievement.fromJson(e))
+          List<Achievement> achievements = [];
+          if (json['achievements'] != null) {
+            final achievementJson = json['achievements'] as List<dynamic>;
+            achievements = achievementJson
+                .map((e) => Achievement.fromJson(e))
                 .toList();
-            return parsedHabit.copyWith(achievements: achievements);
-          } else {
-            return parsedHabit;
           }
+          return parsedHabit.copyWith(achievements: achievements);
         }).toList();
 
         for (int i = 0; i < _habits.length; i++) {
-          if (_habits[i].achievements == null) {
+          if (_habits[i].achievements.isEmpty) {
             _habits[i] = _habits[i].copyWith(
                 achievements: _initDefaultAchievements(_habits[i].targetDays));
             await _scheduleNotificationForHabit(_habits[i]);
@@ -73,9 +72,9 @@ class HabitProvider extends ChangeNotifier {
 
   Future<void> addHabit(Habit habit) async {
     Habit habitWithAchievements = habit;
-    if (habit.achievements == null) {
-      habitWithAchievements = habit.copyWith(
-          achievements: _initDefaultAchievements(habit.targetDays));
+    if (habit.achievements.isEmpty) {
+      habitWithAchievements =
+          habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays));
     }
     _habits.add(habitWithAchievements);
     await _saveHabits();
@@ -87,9 +86,9 @@ class HabitProvider extends ChangeNotifier {
     int index = _habits.indexWhere((h) => h.id == habit.id);
     if (index != -1) {
       Habit habitWithAchievements = habit;
-      if (habit.achievements == null) {
-        habitWithAchievements = habit.copyWith(
-            achievements: _initDefaultAchievements(habit.targetDays));
+      if (habit.achievements.isEmpty) {
+        habitWithAchievements =
+            habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays));
       }
       _habits[index] = habitWithAchievements;
       await _saveHabits();
@@ -108,11 +107,10 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabitToday() async {
-    final jsonString =
-        await LocalStorage.instance.getString('habitCompletedToday');
+    final jsonString = await LocalStorage.instance.getString('habitCompletedToday');
     if (jsonString != null) {
       try {
-        final map = jsonDecode(jsonString) as Map<String, dynamic>;
+        final Map<String, dynamic> map = jsonDecode(jsonString);
         _habitCompletedToday.clear();
         map.forEach((key, value) {
           _habitCompletedToday[key] = value as bool;
@@ -142,9 +140,8 @@ class HabitProvider extends ChangeNotifier {
     final habit = getHabitById(id);
     if (habit != null) {
       bool updated = false;
-      // need to copy achievements to mutate them safely
-      List<achievement_model.Achievement> updatedAchievements =
-          habit.achievements?.map((a) => a.copyWith()).toList() ?? [];
+      List<Achievement> updatedAchievements =
+          habit.achievements.map((a) => a.copyWith()).toList();
 
       for (final achievement in updatedAchievements) {
         if (!achievement.achieved) {
@@ -163,7 +160,7 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> saveAchievements(Habit habit) async {
-    final idx = _habits.indexWhere((h) => h.id == habit.id);
+    int idx = _habits.indexWhere((h) => h.id == habit.id);
     if (idx != -1) {
       _habits[idx] = habit;
       await _saveHabits();
@@ -181,8 +178,8 @@ class HabitProvider extends ChangeNotifier {
       return;
     }
     final now = DateTime.now();
-    var scheduledTime = DateTime(now.year, now.month, now.day,
-        habit.reminderTime!.hour, habit.reminderTime!.minute);
+    var scheduledTime = DateTime(
+        now.year, now.month, now.day, habit.reminderTime!.hour, habit.reminderTime!.minute);
     if (scheduledTime.isBefore(now)) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
@@ -194,116 +191,104 @@ class HabitProvider extends ChangeNotifier {
     );
   }
 
-  List<achievement_model.Achievement> _initDefaultAchievements(int? customTarget) {
-    final milestones = <achievement_model.Achievement>[
-      achievement_model.Achievement(
+  List<Achievement> _initDefaultAchievements(int? customTarget) {
+    final milestones = <Achievement>[
+      Achievement(
         id: '1',
         habitId: '',
         title: '3 Days',
         requiredStreak: 3,
         points: 5,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_3_days.png',
+        medalAsset: 'assets/icon/medal_3_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '2',
         habitId: '',
         title: '7 Days',
         requiredStreak: 7,
         points: 10,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_7_days.png',
+        medalAsset: 'assets/icon/medal_7_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '3',
         habitId: '',
         title: '15 Days',
         requiredStreak: 15,
         points: 15,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_15_days.png',
+        medalAsset: 'assets/icon/medal_15_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '4',
         habitId: '',
         title: '30 Days',
         requiredStreak: 30,
         points: 20,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_30_days.png',
+        medalAsset: 'assets/icon/medal_30_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '5',
         habitId: '',
         title: '60 Days',
         requiredStreak: 60,
         points: 30,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_60_days.png',
+        medalAsset: 'assets/icon/medal_60_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '6',
         habitId: '',
         title: '90 Days',
         requiredStreak: 90,
         points: 50,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_90_days.png',
+        medalAsset: 'assets/icon/medal_90_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '7',
         habitId: '',
         title: '180 Days',
         requiredStreak: 180,
         points: 75,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_180_days.png',
+        medalAsset: 'assets/icon/medal_180_days.png',
       ),
-      achievement_model.Achievement(
+      Achievement(
         id: '8',
         habitId: '',
         title: '365 Days',
         requiredStreak: 365,
         points: 100,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_365_days.png',
+        medalAsset: 'assets/icon/medal_365_days.png',
       ),
     ];
 
     if (customTarget != null && customTarget > 0) {
-      milestones.add(achievement_model.Achievement(
+      milestones.add(Achievement(
         id: 'custom',
         habitId: '',
         title: 'Custom Target',
         requiredStreak: customTarget,
         points: 0,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_custom_days.png',
+        medalAsset: 'assets/icon/medal_custom_days.png',
       ));
     } else {
-      milestones.add(achievement_model.Achievement(
+      milestones.add(Achievement(
         id: 'custom_placeholder',
         habitId: '',
         title: 'Custom Target Placeholder',
         requiredStreak: 9999,
         points: 0,
         achieved: false,
-        medalIconAsset: 'assets/icon/medal_custom_days.png',
+        medalAsset: 'assets/icon/medal_custom_days.png',
       ));
     }
 
     return milestones;
   }
-}
-
-class _HabitProgress {
-  final Habit habit;
-  final double percent;
-  final int completedDays;
-
-  _HabitProgress({
-    required this.habit,
-    required this.percent,
-    required this.completedDays,
-  });
 }
