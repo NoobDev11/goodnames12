@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/habit_provider.dart';
+import '../providers/habit_provider.dart' as habit_provider;
 import '../models/habit.dart' as habit_model;
 import '../models/achievement.dart' as achievement_model;
 
@@ -38,7 +38,7 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
   }
 
   List<achievement_model.Achievement> _getAchievementsForHabit(habit_model.Habit habit) {
-    return habit.achievements ?? [];
+    return habit.achievements ?? <achievement_model.Achievement>[];
   }
 
   int _calculateTotalPoints(List<achievement_model.Achievement> achievements) {
@@ -120,7 +120,7 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: habits.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, index) {
+              itemBuilder: (context, index) {
                 final h = habits[index];
                 final isSelected = h.id == _selectedHabitId;
                 return GestureDetector(
@@ -160,10 +160,10 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
                   crossAxisSpacing: 12,
                 ),
                 itemCount: achievements.length,
-                itemBuilder: (ctx, index) {
+                itemBuilder: (context, index) {
                   final achievement = achievements[index];
                   final isAchieved = achievement.achieved;
-                  final label = achievement.title ?? '${achievement.days} Days';
+                  final label = achievement.label ?? '${achievement.days} Days';
                   final points = achievement.points;
 
                   return Semantics(
