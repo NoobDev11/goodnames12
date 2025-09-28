@@ -1,4 +1,3 @@
-// lib/providers/habit_provider.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
@@ -26,7 +25,7 @@ class HabitProvider extends ChangeNotifier {
 
   List<Habit> get habits => _habits;
 
-  Habit? getHabitById(String id) {
+  Habit? getHabit(String id) {
     try {
       return _habits.firstWhere((h) => h.id == id);
     } catch (_) {
@@ -41,18 +40,21 @@ class HabitProvider extends ChangeNotifier {
         List<dynamic> jsonList = jsonDecode(jsonString);
         _habits = jsonList.map((json) {
           final parsedHabit = Habit.fromJson(json);
-          final achievements = (json['achievements'] as List<dynamic>?)
-                  ?.map((e) => Achievement.fromJson(e))
-                  .toList() ??
-              [];
+          List<Achievement> achievements = [];
+          if (json['achievements'] != null) {
+            final achievementsJson = json['achievements'] as List?;
+            if (achievementsJson != null) {
+              achievements = achievementsJson.map((e) => Achievement.fromJson(e)).toList();
+            }
+          }
           return parsedHabit.copyWith(achievements: achievements);
         }).toList();
 
         for (int i = 0; i < _habits.length; i++) {
-          if (_habits[i].achievements.isEmpty) {
+          final ach = _habits[i].achievements;
+          if (ach == null || ach.isEmpty) {
             _habits[i] = _habits[i].copyWith(
-              achievements: _initDefaultAchievements(_habits[i].targetDays),
-            );
+                achievements: _initDefaultAchievements(_habits[i].targetDays));
             await _scheduleNotificationForHabit(_habits[i]);
           }
         }
@@ -70,9 +72,9 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> addHabit(Habit habit) async {
-    Habit habitWithAchievements = habit.achievements.isEmpty
-        ? habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays))
-        : habit;
+    final ach = habit.achievements;
+    Habit habitWithAchievements =
+        (ach == null || ach.isEmpty) ? habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays)) : habit;
 
     _habits.add(habitWithAchievements);
     await _saveHabits();
@@ -81,12 +83,13 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> updateHabit(Habit habit) async {
-    int index = _habits.indexWhere((h) => h.id == habit.id);
-    if (index != -1) {
-      Habit habitWithAchievements = habit.achievements.isEmpty
-          ? habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays))
-          : habit;
+    final ach = habit.achievements;
+    Habit habitWithAchievements = (ach == null || ach.isEmpty)
+        ? habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays))
+        : habit;
 
+    final index = _habits.indexWhere((h) => h.id == habit.id);
+    if (index != -1) {
       _habits[index] = habitWithAchievements;
       await _saveHabits();
       await _scheduleNotificationForHabit(habitWithAchievements);
@@ -104,18 +107,19 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _loadHabitToday() async {
-    final jsonString =
-        await LocalStorage.instance.getString('habitCompletedToday');
-    if (jsonString != null) {
-      try {
-        final Map<String, dynamic> map = jsonDecode(jsonString);
-        _habitCompletedToday.clear();
-        map.forEach((key, value) {
-          _habitCompletedToday[key] = value as bool;
-        });
-      } catch (_) {
-        _habitCompletedToday.clear();
-      }
+    final jsonString = await LocalStorage.instance.getString('habitCompletedToday');
+    if (jsonString == null) {
+      notifyListeners();
+      return;
+    }
+    try {
+      final map = jsonDecode(jsonString) as Map<String, dynamic>;
+      _habitCompletedToday.clear();
+      map.forEach((key, value) {
+        _habitCompletedToday[key] = value as bool;
+      });
+    } catch (_) {
+      _habitCompletedToday.clear();
     }
     notifyListeners();
   }
@@ -133,42 +137,41 @@ class HabitProvider extends ChangeNotifier {
 
     statsProvider.markDone?.call(id, DateTime.now(), !isCompleted);
 
-    final habit = getHabitById(id);
-    if (habit != null) {
-      bool updated = false;
-      final updatedAchievements =
-          habit.achievements.map((a) => a.copyWith()).toList();
+    final habit = getHabit(id);
+    if (habit == null) return;
 
-      for (var i = 0; i < updatedAchievements.length; i++) {
-        final achievement = updatedAchievements[i];
-        if (!achievement.achieved &&
-            statsProvider.currentStreak != null &&
-            statsProvider.currentStreak!(id) >= achievement.requiredStreak) {
-          updatedAchievements[i] =
-              achievement.copyWith(achieved: true); // immutable update
-          updated = true;
-        }
-      }
+    bool updated = false;
+    List<Achievement> updatedAchievements = habit.achievements?.map((a) => a.copyWith())?.toList() ?? [];
 
-      if (updated) {
-        final updatedHabit = habit.copyWith(achievements: updatedAchievements);
-        saveAchievements(updatedHabit);
+    for (int i = 0; i < updatedAchievements.length; i++) {
+      final ach = updatedAchievements[i];
+      if (!ach.achieved &&
+          (statsProvider.currentStreak?.call(id) ?? 0) >= ach.requiredStreak) {
+        updatedAchievements[i] = ach.copyWith(achieved: true);
+        updated = true;
       }
+    }
+    if (updated) {
+      final updatedHabit = habit.copyWith(achievements: updatedAchievements);
+      saveAchievements(updatedHabit);
     }
   }
 
   Future<void> saveAchievements(Habit habit) async {
-    int idx = _habits.indexWhere((h) => h.id == habit.id);
-    if (idx != -1) {
-      _habits[idx] = habit;
-      await _saveHabits();
-      notifyListeners();
-    }
+    final idx = _habits.indexWhere((h) => h.id == habit.id);
+    if (idx == -1) return;
+    _habits[idx] = habit;
+    await _saveHabits();
+    notifyListeners();
   }
 
-  bool isHabitCompletedToday(String id) => _habitCompletedToday[id] ?? false;
+  bool isHabitCompletedToday(String id) {
+    return _habitCompletedToday[id] ?? false;
+  }
 
-  int _notificationId(String habitId) => habitId.hashCode & 0x7FFFFFFF;
+  int _notificationId(String id) {
+    return id.hashCode & 0x7FFFFFFF;
+  }
 
   Future<void> _scheduleNotificationForHabit(Habit habit) async {
     if (habit.reminderTime == null) {
@@ -176,11 +179,8 @@ class HabitProvider extends ChangeNotifier {
       return;
     }
     final now = DateTime.now();
-    var scheduledTime = DateTime(now.year, now.month, now.day,
-        habit.reminderTime!.hour, habit.reminderTime!.minute);
-    if (scheduledTime.isBefore(now)) {
-      scheduledTime = scheduledTime.add(const Duration(days: 1));
-    }
+    var scheduledTime = DateTime(now.year, now.month, now.day, habit.reminderTime!.hour, habit.reminderTime!.minute);
+    if (scheduledTime.isBefore(now)) scheduledTime = scheduledTime.add(Duration(days: 1));
     await _notificationService.scheduleNotification(
       _notificationId(habit.id),
       'Time for your habit!',
@@ -266,17 +266,30 @@ class HabitProvider extends ChangeNotifier {
     ];
 
     if (customTarget != null && customTarget > 0) {
-      milestones.add(Achievement(
-        id: 'custom',
-        habitId: '',
-        title: 'Custom Target',
-        requiredStreak: customTarget,
-        points: 0,
-        achieved: false,
-        medalAsset: 'assets/icon/medal_custom_days.png',
-      ));
+      milestones.add(
+        Achievement(
+          id: 'custom',
+          habitId: '',
+          title: 'Custom Target',
+          requiredStreak: customTarget,
+          points: 0,
+          achieved: false,
+          medalAsset: 'assets/icon/medal_custom.png',
+        ),
+      );
     }
-
     return milestones;
   }
+}
+
+class _HabitProgress {
+  final Habit habit;
+  final double percent;
+  final int completedDays;
+
+  _HabitProgress({
+    required this.habit,
+    required this.percent,
+    required this.completedDays,
+  });
 }
