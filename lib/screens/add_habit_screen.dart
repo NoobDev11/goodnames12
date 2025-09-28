@@ -69,7 +69,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     Icons.build_circle_rounded,
     Icons.pause_circle_filled_rounded,
     Icons.play_circle_filled_rounded,
-    Icons.swap_horizontal_circle_rounded, // corrected icon name here
+    Icons.swap_horizontal_circle_rounded,
     Icons.clear_rounded,
     Icons.star_rounded,
     Icons.stars_rounded,
@@ -119,14 +119,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   String colorToHex(Color color) {
-  final r = (color.r * 255).round() & 0xFF;
-  final g = (color.g * 255).round() & 0xFF;
-  final b = (color.b * 255).round() & 0xFF;
-  return '#'
-      '${r.toRadixString(16).padLeft(2, '0')}'
-      '${g.toRadixString(16).padLeft(2, '0')}'
-      '${b.toRadixString(16).padLeft(2, '0')}';
-}
+    final r = color.red & 0xFF;
+    final g = color.green & 0xFF;
+    final b = color.blue & 0xFF;
+    return '#'
+        '${r.toRadixString(16).padLeft(2, '0')}'
+        '${g.toRadixString(16).padLeft(2, '0')}'
+        '${b.toRadixString(16).padLeft(2, '0')}';
+  }
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) return;
@@ -143,7 +143,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       );
     }
 
-    final markerColor = _markerColors[_selectedMarker ?? _customMarkers[0]] ?? Colors.grey;
+    final markerColor =
+        _markerColors[_selectedMarker ?? _customMarkers[0]] ?? Colors.grey;
 
     final int? targetDaysValue = int.tryParse(_targetDays ?? '');
 
@@ -151,7 +152,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: _habitNameController.text.trim(),
       reminderTime: reminderDateTime,
-      targetDays: targetDaysValue != null && targetDaysValue > 0 ? targetDaysValue : null,
+      targetDays: targetDaysValue != null && targetDaysValue > 0
+          ? targetDaysValue
+          : null,
       iconName: (_selectedIcon ?? _habitIcons[0]).codePoint.toString(),
       iconColorHex: _selectedColor ?? _iconColors[0],
       markerIcon: (_selectedMarker ?? _customMarkers[0]).codePoint.toString(),
@@ -230,8 +233,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           hintText: "e.g. read journal",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (val) =>
-                            val == null || val.trim().isEmpty ? 'Required' : null,
+                        validator: (val) => val == null || val.trim().isEmpty
+                            ? 'Required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -304,7 +308,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                 ),
                               ],
                             ),
-                          ),
+                          )
                         ],
                       ),
                       const SizedBox(height: 18),
@@ -313,7 +317,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         margin: EdgeInsets.zero,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 14.0, horizontal: 12),
+                            vertical: 14.0,
+                            horizontal: 12,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -353,7 +359,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         margin: EdgeInsets.zero,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 12),
+                            vertical: 14,
+                            horizontal: 12,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -369,12 +377,14 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                 children: _iconColors.map((hex) {
                                   final selected = _selectedColor == hex;
                                   return GestureDetector(
-                                    onTap: () => setState(() => _selectedColor = hex),
+                                    onTap: () =>
+                                        setState(() => _selectedColor = hex),
                                     child: CircleAvatar(
                                       radius: 15,
                                       backgroundColor: _colorFromHex(hex),
                                       child: selected
-                                          ? const Icon(Icons.check, color: Colors.white)
+                                          ? const Icon(Icons.check,
+                                              color: Colors.white)
                                           : null,
                                     ),
                                   );
@@ -390,7 +400,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                         margin: EdgeInsets.zero,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 12),
+                            vertical: 14,
+                            horizontal: 12,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -405,14 +417,19 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 children: _customMarkers.map((marker) {
                                   final selected = _selectedMarker == marker;
-                                  final color = _markerColors[marker] ?? Colors.grey;
+                                  final color =
+                                      _markerColors[marker] ?? Colors.grey;
                                   return GestureDetector(
-                                    onTap: () => setState(() => _selectedMarker = marker),
+                                    onTap: () =>
+                                        setState(() => _selectedMarker = marker),
                                     child: CircleAvatar(
                                       radius: 17,
-                                      backgroundColor: selected ? color : Colors.grey[200],
+                                      backgroundColor:
+                                          selected ? color : Colors.grey[200],
                                       child: Icon(marker,
-                                          color: selected ? Colors.white : Colors.black54),
+                                          color: selected
+                                              ? Colors.white
+                                              : Colors.black54),
                                     ),
                                   );
                                 }).toList(),
@@ -447,9 +464,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          side: BorderSide(
-                            color: Colors.deepPurple.shade100,
-                          ),
+                          side:
+                              BorderSide(color: Colors.deepPurple.shade100),
                         ),
                         child: const Text("Cancel"),
                       ),
