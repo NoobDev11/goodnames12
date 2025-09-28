@@ -88,7 +88,7 @@ class HabitProvider extends ChangeNotifier {
         ? habit.copyWith(achievements: _initDefaultAchievements(habit.targetDays))
         : habit;
 
-    final index = _habits.indexWhere((h) => h.id == habit.id);
+    final index = _habits.indexOf(habit);
     if (index != -1) {
       _habits[index] = habitWithAchievements;
       await _saveHabits();
@@ -145,7 +145,7 @@ class HabitProvider extends ChangeNotifier {
 
     for (int i = 0; i < updatedAchievements.length; i++) {
       final ach = updatedAchievements[i];
-      if (!ach.achieved &&
+      if (achieved == false &&
           (statsProvider.currentStreak?.call(id) ?? 0) >= ach.requiredStreak) {
         updatedAchievements[i] = ach.copyWith(achieved: true);
         updated = true;
@@ -153,14 +153,14 @@ class HabitProvider extends ChangeNotifier {
     }
     if (updated) {
       final updatedHabit = habit.copyWith(achievements: updatedAchievements);
-      saveAchievements(updatedHabit);
+      saveHabits(updatedHabit);
     }
   }
 
-  Future<void> saveAchievements(Habit habit) async {
-    final idx = _habits.indexWhere((h) => h.id == habit.id);
-    if (idx == -1) return;
-    _habits[idx] = habit;
+  Future<void> saveHabits(Habit habit) async {
+    final index = _habits.indexWhere((h) => h.id == habit.id);
+    if (index == -1) return;
+    _habits[index] = habit;
     await _saveHabits();
     notifyListeners();
   }
@@ -189,11 +189,16 @@ class HabitProvider extends ChangeNotifier {
     );
   }
 
+  void importHabits(List<Habit> habits) {
+    _habits = habits;
+    notifyListeners();
+    _saveHabits();
+  }
+
   List<Achievement> _initDefaultAchievements(int? customTarget) {
     final milestones = <Achievement>[
       Achievement(
         id: '1',
-        habitId: '',
         title: '3 Days',
         requiredStreak: 3,
         points: 5,
@@ -202,7 +207,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '2',
-        habitId: '',
         title: '7 Days',
         requiredStreak: 7,
         points: 10,
@@ -211,7 +215,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '3',
-        habitId: '',
         title: '15 Days',
         requiredStreak: 15,
         points: 15,
@@ -220,7 +223,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '4',
-        habitId: '',
         title: '30 Days',
         requiredStreak: 30,
         points: 20,
@@ -229,7 +231,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '5',
-        habitId: '',
         title: '60 Days',
         requiredStreak: 60,
         points: 30,
@@ -238,7 +239,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '6',
-        habitId: '',
         title: '90 Days',
         requiredStreak: 90,
         points: 50,
@@ -247,7 +247,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '7',
-        habitId: '',
         title: '180 Days',
         requiredStreak: 180,
         points: 75,
@@ -256,7 +255,6 @@ class HabitProvider extends ChangeNotifier {
       ),
       Achievement(
         id: '8',
-        habitId: '',
         title: '365 Days',
         requiredStreak: 365,
         points: 100,
@@ -269,7 +267,6 @@ class HabitProvider extends ChangeNotifier {
       milestones.add(
         Achievement(
           id: 'custom',
-          habitId: '',
           title: 'Custom Target',
           requiredStreak: customTarget,
           points: 0,
