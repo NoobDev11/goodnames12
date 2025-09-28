@@ -9,7 +9,8 @@ class NotificationService {
 
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -45,7 +46,11 @@ class NotificationService {
         ),
       ),
       androidAllowWhileIdle: true,
-      matchDateTimeComponents: recurringDaily ? DateTimeComponents.time : null,
+      // Removed deprecated androidScheduleMode and androidAllowWhileIdle fixed in plugin version
+      matchDateTimeComponents:
+          recurringDaily ? DateTimeComponents.time : null,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
