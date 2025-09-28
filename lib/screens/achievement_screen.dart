@@ -140,7 +140,9 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
                     child: Center(
                       child: Text(
                         h.name,
-                        style: TextStyle(color: isSelected ? Colors.white : Colors.black87),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                        ),
                       ),
                     ),
                   ),
@@ -163,7 +165,7 @@ class _AchievementScreenState extends State<AchievementScreen> with SingleTicker
                 itemBuilder: (context, index) {
                   final achievement = achievements[index];
                   final isAchieved = achievement.achieved;
-                  final label = achievement.label ?? '${achievement.days} Days';
+                  final label = achievement.title;
                   final points = achievement.points;
 
                   return Semantics(
