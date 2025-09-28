@@ -1,6 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -13,7 +13,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    tz.initializeTimeZones();
+    tz_data.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -22,11 +22,10 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // handle tap on notification here
+        // handle tap on notification
       },
-      onDidReceiveBackgroundNotificationResponse:
-          (NotificationResponse response) {
-        // handle background tap here
+      onDidReceiveBackgroundNotificationResponse: (NotificationResponse response) {
+        // handle background tap
       },
     );
   }
@@ -38,8 +37,7 @@ class NotificationService {
     DateTime scheduledTime, {
     bool recurringDaily = false,
   }) async {
-    final tz.TZDateTime tzScheduled =
-        tz.TZDateTime.from(scheduledTime, tz.local);
+    final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
@@ -55,12 +53,10 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
-      // ✅ updated for v19.4.2
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents:
           recurringDaily ? DateTimeComponents.time : null,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      // Removed uiLocalNotificationScheduleInterpretation parameter because it's deprecated in latest flutter_local_notifications
     );
   }
 
