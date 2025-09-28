@@ -10,22 +10,22 @@ class LocalStorage {
   LocalStorage._internal();
 
   /// Save a string value for a given [key].
-  /// Optionally, a [prefix] can be provided to isolate keys.
-  Future<void> saveString(String key, String value, {String prefix = ''}) async {
+  /// Optional [prefix] to namespace keys.
+  Future<void> setString(String key, String value, {String prefix = ''}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$prefix$key', value);
   }
 
   /// Retrieve a string value for a given [key].
-  /// Optionally, a [prefix] can be provided to isolate keys.
+  /// Optional [prefix] to namespace keys.
   Future<String?> getString(String key, {String prefix = ''}) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('$prefix$key');
   }
 
   /// Remove a string value for a given [key].
-  /// Optionally, a [prefix] can be provided to isolate keys.
-  Future<void> removeString(String key, {String prefix = ''}) async {
+  /// Optional [prefix] to namespace keys.
+  Future<void> remove(String key, {String prefix = ''}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$prefix$key');
   }
