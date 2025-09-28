@@ -118,11 +118,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
-  String _colorToHex(Color color) {
-    return '#${color.red.toRadixString(16).padLeft(2, '0')}'
-        '${color.green.toRadixString(16).padLeft(2, '0')}'
-        '${color.blue.toRadixString(16).padLeft(2, '0')}';
-  }
+  String colorToHex(Color color) {
+  final r = (color.r * 255).round() & 0xFF;
+  final g = (color.g * 255).round() & 0xFF;
+  final b = (color.b * 255).round() & 0xFF;
+  return '#'
+      '${r.toRadixString(16).padLeft(2, '0')}'
+      '${g.toRadixString(16).padLeft(2, '0')}'
+      '${b.toRadixString(16).padLeft(2, '0')}';
+}
 
   void _onAddHabit() {
     if (!_formKey.currentState!.validate()) {
