@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/habit.dart';
-import '../models/achievement.dart';
+import '../models/achievement.dart' as achievement_model;
 import '../data/local_storage.dart';
 import 'habit_stats_provider.dart';
 import '../services/notification_service.dart';
@@ -41,9 +41,14 @@ class HabitProvider extends ChangeNotifier {
         _habits = jsonList.map((json) => Habit.fromJson(json)).toList();
 
         for (int i = 0; i < _habits.length; i++) {
-          if (_habits[i].achievements == null) {
+          // Convert dynamic list to a strongly-typed achievements list
+          if (_habits[i].achievements == null ||
+              (_habits[i].achievements != null &&
+                  _habits[i].achievements!.isNotEmpty &&
+                  _habits[i].achievements![0] is Map)) {
+            final target = _habits[i].targetDays;
             _habits[i] = _habits[i].copyWith(
-                achievements: _initDefaultAchievements(_habits[i].targetDays));
+                achievements: _initDefaultAchievements(target));
             await _scheduleNotificationForHabit(_habits[i]);
           }
         }
@@ -113,7 +118,8 @@ class HabitProvider extends ChangeNotifier {
   }
 
   Future<void> _saveHabitToday() async {
-    await LocalStorage().setString('habitCompletedToday', jsonEncode(_habitCompletedToday));
+    await LocalStorage().setString(
+        'habitCompletedToday', jsonEncode(_habitCompletedToday));
   }
 
   void toggleHabitCompleted(String id) {
@@ -122,14 +128,17 @@ class HabitProvider extends ChangeNotifier {
     _saveHabitToday();
     notifyListeners();
 
-    statsProvider.markDone(id, DateTime.now(), !isCompleted);
+    if (statsProvider.markDone != null) {
+      statsProvider.markDone(id, DateTime.now(), !isCompleted);
+    }
 
     Habit? habit = getHabitById(id);
     if (habit != null) {
       bool updated = false;
       for (var achievement in habit.achievements ?? []) {
         if (!achievement.achieved) {
-          if (statsProvider.currentStreak(id) >= achievement.days) {
+          if (statsProvider.currentStreak != null &&
+              statsProvider.currentStreak(id) >= achievement.days) {
             achievement.achieved = true;
             updated = true;
           }
@@ -160,38 +169,78 @@ class HabitProvider extends ChangeNotifier {
       return;
     }
     final now = DateTime.now();
-    var scheduledTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        habit.reminderTime!.hour,
+    var scheduledTime = DateTime(now.year, now.month, now.day, habit.reminderTime!.hour,
         habit.reminderTime!.minute);
     if (scheduledTime.isBefore(now)) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
     await _notificationService.scheduleNotification(
-        _notificationId(habit.id),
-        'Time for your habit!',
-        'Don\'t forget to complete "${habit.name}" today.',
-        scheduledTime,
-        recurring: true);
+      _notificationId(habit.id),
+      'Time for your habit!',
+      'Don\'t forget to complete "${habit.name}" today.',
+      scheduledTime,
+    );
   }
 
-  List<Achievement> _initDefaultAchievements(int? customTarget) {
-    List<Achievement> milestones = [
-      Achievement(days: 3, points: 5, achieved: false, medalIconAsset: 'assets/icon/medal_3_days.png'),
-      Achievement(days: 7, points: 10, achieved: false, medalIconAsset: 'assets/icon/medal_7_days.png'),
-      Achievement(days: 15, points: 15, achieved: false, medalIconAsset: 'assets/icon/medal_15_days.png'),
-      Achievement(days: 30, points: 20, achieved: false, medalIconAsset: 'assets/icon/medal_30_days.png'),
-      Achievement(days: 60, points: 30, achieved: false, medalIconAsset: 'assets/icon/medal_60_days.png'),
-      Achievement(days: 90, points: 50, achieved: false, medalIconAsset: 'assets/icon/medal_90_days.png'),
-      Achievement(days: 180, points: 75, achieved: false, medalIconAsset: 'assets/icon/medal_180_days.png'),
-      Achievement(days: 365, points: 100, achieved: false, medalIconAsset: 'assets/icon/medal_365_days.png'),
+  List<achievement_model.Achievement> _initDefaultAchievements(int? customTarget) {
+    List<achievement_model.Achievement> milestones = [
+      achievement_model.Achievement(
+          days: 3,
+          points: 5,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_3_days.png'),
+      achievement_model.Achievement(
+          days: 7,
+          points: 10,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_7_days.png'),
+      achievement_model.Achievement(
+          days: 15,
+          points: 15,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_15_days.png'),
+      achievement_model.Achievement(
+          days: 30,
+          points: 20,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_30_days.png'),
+      achievement_model.Achievement(
+          days: 60,
+          points: 30,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_60_days.png'),
+      achievement_model.Achievement(
+          days: 90,
+          points: 50,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_90_days.png'),
+      achievement_model.Achievement(
+          days: 180,
+          points: 75,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_180_days.png'),
+      achievement_model.Achievement(
+          days: 365,
+          points: 100,
+          achieved: false,
+          medalIconAsset: 'assets/icon/medal_365_days.png'),
     ];
     if (customTarget != null && customTarget > 0) {
-      milestones.add(Achievement(days: customTarget, points: 0, achieved: false, label: 'Custom Target', medalIconAsset: 'assets/icon/medal_custom_days.png'));
+      milestones.add(achievement_model.Achievement(
+        days: customTarget,
+        points: 0,
+        achieved: false,
+        label: 'Custom Target',
+        medalIconAsset: 'assets/icon/medal_custom_days.png',
+      ));
     } else {
-      milestones.add(Achievement(days: 9999, points: 0, achieved: false, label: 'Custom Target Placeholder', medalIconAsset: 'assets/icon/medal_custom_days.png'));
+      milestones.add(achievement_model.Achievement(
+        days: 9999,
+        points: 0,
+        achieved: false,
+        label: 'Custom Target Placeholder',
+        medalIconAsset: 'assets/icon/medal_custom_days.png',
+      ));
     }
     return milestones;
   }
