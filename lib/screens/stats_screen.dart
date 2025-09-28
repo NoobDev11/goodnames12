@@ -17,7 +17,6 @@ class _StatsScreenState extends State<StatsScreen> {
 
   List<Habit> get _habits => context.read<HabitProvider>().habits;
 
-  // Use these for UI habit selection and labels
   List<String> get _habitFilterIds => ['all', ..._habits.map((h) => h.id)];
 
   String _habitNameById(String id) {
@@ -28,7 +27,7 @@ class _StatsScreenState extends State<StatsScreen> {
         id: 'all',
         name: 'Unknown',
         iconName: '',
-        iconColorHex: '',
+        colorHex: '',
         markerIcon: '',
         markerColorHex: '',
       ),
@@ -36,14 +35,15 @@ class _StatsScreenState extends State<StatsScreen> {
     return habit.name;
   }
 
-  List<FlSpot> _buildLineChartData(HabitStatsProvider habitStats, String habitId) {
+  List<FlSpot> _buildLineChartData(HabitStatsProvider stats, String habitId) {
     final today = DateTime.now();
     const weeksToShow = 12;
-    final startDate = habitStats.getHabitStartDate(habitId) ?? today.subtract(Duration(days: weeksToShow * 7));
+    final startDate = stats.getHabitStartDate(habitId) ?? today.subtract(Duration(days: weeksToShow * 7));
+
     final spots = <FlSpot>[];
     for (int i = 0; i < weeksToShow; i++) {
       final weekStart = startDate.add(Duration(days: i * 7));
-      final completions = habitStats.completionsInWeek(habitId, weekStart);
+      final completions = stats.completionsInWeek(habitId, weekStart);
       spots.add(FlSpot(i.toDouble(), completions.toDouble()));
     }
     return spots;
@@ -58,27 +58,18 @@ class _StatsScreenState extends State<StatsScreen> {
     if (_selectedHabitId == 'all') {
       final totalHabits = _habits.length;
 
-      final completedHabitCountByDay = List<int>.generate(7, (i) {
+      final completedCountByDay = List<int>.generate(7, (i) {
         final day = today.subtract(Duration(days: today.weekday - 1 - i));
-        int completedCount = 0;
-        for (final habit in _habits) {
-          if (habitStats.isHabitDone(habit.id, day)) completedCount++;
-        }
-        return completedCount;
+        return _habits.where((habit) => habitStats.isHabitDone(habit.id, day)).length;
       });
 
       final habitProgressList = _habits.map((habit) {
-        int daysCompleted = 0;
-        for (int i = 0; i < 7; i++) {
+        final completedDays = List.generate(7, (i) {
           final day = today.subtract(Duration(days: today.weekday - 1 - i));
-          if (habitStats.isHabitDone(habit.id, day)) daysCompleted++;
-        }
-        final percent = (daysCompleted / 7) * 100;
-        return _HabitProgress(
-          habit: habit,
-          percent: percent,
-          completedDays: daysCompleted,
-        );
+          return habitStats.isHabitDone(habit.id, day);
+        }).where((done) => done).length;
+        final percent = (completedDays / 7) * 100;
+        return _HabitProgress(habit: habit, percent: percent, completedDays: completedDays);
       }).toList()
         ..sort((a, b) => b.percent.compareTo(a.percent));
 
@@ -92,6 +83,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 height: 40,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   itemCount: _habitFilterIds.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (_, idx) {
@@ -99,9 +91,7 @@ class _StatsScreenState extends State<StatsScreen> {
                     final name = _habitNameById(id);
                     final isSelected = id == _selectedHabitId;
                     return GestureDetector(
-                      onTap: () {
-                        setState(() => _selectedHabitId = id);
-                      },
+                      onTap: () => setState(() => _selectedHabitId = id),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -127,10 +117,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      const Text(
-                        'Weekly Completion - All Habits',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      const Text('Weekly Completion - All Habits', style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(
                         height: 150,
                         child: BarChart(
@@ -151,32 +138,25 @@ class _StatsScreenState extends State<StatsScreen> {
                                   },
                                 ),
                               ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: true, interval: 1),
-                              ),
-                              rightTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              topTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
+                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, interval: 1)),
+                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             ),
                             gridData: FlGridData(show: true),
                             borderData: FlBorderData(show: false),
-                            barGroups: List.generate(
-                              7,
-                              (i) => BarChartGroupData(
-                                x: i,
+                            barGroups: List.generate(7, (index) {
+                              return BarChartGroupData(
+                                x: index,
                                 barRods: [
                                   BarChartRodData(
-                                    toY: completedHabitCountByDay[i].toDouble(),
+                                    toY: completedCountByDay[index].toDouble(),
                                     color: Colors.deepPurple,
                                     width: 16,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ],
-                              ),
-                            ),
+                              );
+                            }),
                           ),
                         ),
                       ),
@@ -190,23 +170,20 @@ class _StatsScreenState extends State<StatsScreen> {
                     padding: const EdgeInsets.all(12),
                     child: Column(
                       children: [
-                        const Text(
-                          "Habit Weekly Progress",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        const Text('Habit Progress (last 7 days)', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(
                           child: ListView.builder(
                             itemCount: habitProgressList.length,
                             itemBuilder: (context, index) {
-                              final hp = habitProgressList[index];
+                              final progress = habitProgressList[index];
                               return ListTile(
-                                title: Text(hp.habit.name),
+                                title: Text(progress.habit.name),
                                 subtitle: LinearProgressIndicator(
+                                  value: progress.percent / 100,
                                   backgroundColor: Colors.grey[300],
-                                  value: hp.percent / 100,
                                   color: Colors.deepPurple,
                                 ),
-                                trailing: Text('${hp.percent.toStringAsFixed(0)}% (${hp.completedDays}/7)'),
+                                trailing: Text('${progress.percent.toStringAsFixed(0)}% (${progress.completedDays}/7)'),
                               );
                             },
                           ),
@@ -233,41 +210,37 @@ class _StatsScreenState extends State<StatsScreen> {
 
       final achievements = habit.achievements ?? [];
       achievements.sort((a, b) => a.days.compareTo(b.days));
-      final nextMilestone = achievements.firstWhere(
-        (a) => !a.achieved,
-        orElse: () => achievements.isNotEmpty ? achievements.last : achievements.first,
-      );
+      final nextMilestone = achievements.isNotEmpty
+          ? achievements.firstWhere((a) => !a.achieved, orElse: () => achievements.last)
+          : null;
 
       int progressToNext = 0;
       double progressPercent = 0;
+
       if (nextMilestone != null) {
         progressToNext = nextMilestone.days - currentStreak;
         progressPercent = (currentStreak / nextMilestone.days).clamp(0.0, 1.0);
       }
 
-      final currentWeekCompletion = List<bool>.generate(
-        7,
-        (i) {
-          final day = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1 - i));
-          return habitStats.isHabitDone(_selectedHabitId, day);
-        },
-      );
+      final currentWeekCompletion = List.generate(7, (i) {
+        final day = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1 - i));
+        return habitStats.isHabitDone(habit.id, day);
+      });
 
-      final milestoneWidgets = achievements
-          .map(
-            (a) => ListTile(
-              title: Text(a.label ?? '${a.days} Days'),
-              subtitle: LinearProgressIndicator(
-                value: (currentStreak / a.days).clamp(0.0, 1.0),
-                color: Colors.deepPurple,
-                backgroundColor: Colors.grey[200],
-              ),
-              trailing: Text('${((currentStreak / a.days) * 100).clamp(0, 100).toStringAsFixed(0)}%'),
-            ),
-          )
-          .toList();
+      final milestoneWidgets = achievements.map((achievement) {
+        final percent = (currentStreak / achievement.days).clamp(0.0, 1.0);
+        return ListTile(
+          title: Text(achievement.label ?? '${achievement.days} Days'),
+          subtitle: LinearProgressIndicator(
+            value: percent,
+            color: Colors.deepPurple,
+            backgroundColor: Colors.grey[200],
+          ),
+          trailing: Text('${(percent * 100).toStringAsFixed(0)}%'),
+        );
+      }).toList();
 
-      final lineSpots = _buildLineChartData(habitStats, _selectedHabitId);
+      final lineSpots = _buildLineChartData(habitStats, habit.id);
 
       return Scaffold(
         appBar: AppBar(
@@ -291,12 +264,9 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Next Milestone: ${nextMilestone.label}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Next Milestone: ${nextMilestone?.label ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      LinearProgressIndicator(
-                        value: progressPercent,
-                        color: Colors.deepPurple,
-                      ),
+                      LinearProgressIndicator(value: progressPercent, color: Colors.deepPurple),
                       const SizedBox(height: 6),
                       Text('$progressToNext days to next milestone'),
                     ],
@@ -309,39 +279,20 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Weekly Completion',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      const Text('Weekly Completion', style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: List.generate(
-                          7,
-                          (i) => CircleAvatar(
+                        children: List.generate(7, (i) {
+                          return CircleAvatar(
                             child: Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]),
                             backgroundColor: currentWeekCompletion[i] ? Colors.deepPurple : Colors.grey[300],
                             foregroundColor: currentWeekCompletion[i] ? Colors.white : Colors.black54,
-                          ),
-                        ),
+                          );
+                        }),
                       ),
                     ],
                   ),
-                ),
-              ),
-              Card(
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Milestone Progress',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    ...milestoneWidgets,
-                  ],
                 ),
               ),
               Card(
@@ -351,10 +302,20 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Overall Progress (weeks)',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      const Text('Milestone Progress', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ...milestoneWidgets,
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                margin: const EdgeInsets.only(bottom: 20),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Overall Progress (weeks)', style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(
                         height: 200,
                         child: LineChart(
@@ -366,24 +327,14 @@ class _StatsScreenState extends State<StatsScreen> {
                                   showTitles: true,
                                   reservedSize: 40,
                                   interval: 1,
-                                  getTitlesWidget: (value, _) {
-                                    return Text('W ${value.toInt() + 1}');
-                                  },
+                                  getTitlesWidget: (value, _) => Text('W ${value.toInt() + 1}'),
                                 ),
                               ),
                               leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 40,
-                                  interval: 1,
-                                ),
+                                sideTitles: SideTitles(showTitles: true, reservedSize: 40, interval: 1),
                               ),
-                              rightTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              topTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
+                              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             ),
                             borderData: FlBorderData(show: true),
                             lineBarsData: [
@@ -417,10 +368,7 @@ class _StatsScreenState extends State<StatsScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Text(
-              value.toString(),
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
+            Text(value.toString(), style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
             Text(title),
           ],
         ),
@@ -434,9 +382,5 @@ class _HabitProgress {
   final double percent;
   final int completedDays;
 
-  _HabitProgress({
-    required this.habit,
-    required this.percent,
-    required this.completedDays,
-  });
+  _HabitProgress({required this.habit, required this.percent, required this.completedDays});
 }
