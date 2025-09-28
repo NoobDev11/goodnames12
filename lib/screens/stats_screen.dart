@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../providers/habit_provider.dart';
 import '../providers/habit_stats_provider.dart';
 import '../models/habit.dart';
-import '../models/achievement.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -25,12 +24,13 @@ class _StatsScreenState extends State<StatsScreen> {
     final habit = _habits.firstWhere(
       (h) => h.id == id,
       orElse: () => Habit(
-        id: 'all',
+        id: 'unknown_id',
         name: 'Unknown',
         iconName: '',
         iconColorHex: '',
         markerIcon: '',
         markerColorHex: '',
+        targetDays: null, // Provide the required parameter
       ),
     );
     return habit.name;
@@ -332,9 +332,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                   getTitlesWidget: (value, _) => Text('W ${value.toInt() + 1}'),
                                 ),
                               ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: true, reservedSize: 40, interval: 1),
-                              ),
+                              leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, interval: 1)),
                               rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                             ),
@@ -362,10 +360,25 @@ class _StatsScreenState extends State<StatsScreen> {
     }
   }
 
+  List<FlSpot> _buildLineChartData(HabitStatsProvider stats, String habitId) {
+    final today = DateTime.now();
+    const weeksToShow = 12;
+    final startDate = stats.getHabitStartDate(habitId) ??
+        today.subtract(Duration(days: weeksToShow * 7));
+
+    final spots = <FlSpot>[];
+    for (int i = 0; i < weeksToShow; i++) {
+      final weekStart = startDate.add(Duration(days: i * 7));
+      final completions = stats.completionsInWeek(habitId, weekStart);
+      spots.add(FlSpot(i.toDouble(), completions.toDouble()));
+    }
+    return spots;
+  }
+
   Widget _buildStreakCard(String title, int value) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.all(10),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -384,5 +397,9 @@ class _HabitProgress {
   final double percent;
   final int completedDays;
 
-  _HabitProgress({required this.habit, required this.percent, required this.completedDays});
+  _HabitProgress({
+    required this.habit,
+    required this.percent,
+    required this.completedDays,
+  });
 }
