@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/habit_provider.dart';
-import '../services/data_service.dart'; // Your import/export helper
+import '../services/data_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,15 +27,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final permissionStatus = await Permission.notification.request();
         if (!permissionStatus.isGranted) {
           if (mounted) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Notification denied')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Notification permission denied')),
+            );
           }
           return;
         }
       }
       if (!mounted) return;
       settings.setNotificationsEnabled(value);
-      // TODO: Add notification scheduling logic
+      // TODO: Add notification schedule/unschedule logic
     }
 
     void onDarkModeToggle(bool value) {
@@ -44,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     Future<void> onImport() async {
       try {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
+        final result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowedExtensions: ['json'],
         );
@@ -54,12 +55,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           await dataService.importFromFile(file);
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Imported from: ${file.path}')));
+            SnackBar(content: Text('Imported data from: ${file.path}')),
+          );
         }
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed import: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to import data: $e')),
+        );
       }
     }
 
@@ -67,18 +70,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       try {
         final status = await Permission.storage.request();
         if (!status.isGranted) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Storage denied')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Storage permission denied')),
+            );
+          }
           return;
         }
 
         final directory = await getExternalStorageDirectory();
-
         if (directory == null) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Cannot access storage')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Unable to access storage directory')),
+            );
+          }
           return;
         }
 
@@ -86,18 +92,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final fileName = 'habits_export_${DateTime.now().millisecondsSinceEpoch}.json';
         final filePath = '$path/$fileName';
 
-        final jsonStr = dataService.prepareJsonExport();
+        final json = dataService.prepareJsonExport();
         final file = File(filePath);
+        await file.writeAsString(json);
 
-        await file.writeAsString(jsonStr);
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Exported to $filePath')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Exported data to: $filePath')),
+          );
+        }
       } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed export: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to export data: $e')),
+          );
+        }
       }
     }
 
@@ -109,7 +118,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('App Preference', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('App Preferences',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SwitchListTile(
             title: const Text('Notifications'),
             value: settings.notificationsEnabled,
@@ -123,7 +133,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             secondary: const Icon(Icons.dark_mode),
           ),
           const SizedBox(height: 24),
-          const Text('App Settings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Data Management',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ListTile(
             leading: const Icon(Icons.download),
             title: const Text('Import Data'),
@@ -137,7 +148,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: onExport,
           ),
           const SizedBox(height: 24),
-          const Text('App Info', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('About',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -152,15 +164,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Developed by: AV Interactive'),
+                    child: Text('Developed by AV Interactive'),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    child: Text('App version: v1.0.0.000001'),
+                    child: Text('Version: v1.0.0.000001'),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Last updated on: 00.00.01'),
+                    child: Text('Last updated: 00.00.01'),
                   ),
                 ],
               ),
