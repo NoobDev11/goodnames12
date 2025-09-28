@@ -12,6 +12,11 @@ class HabitStatsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // alias for interop:
+  void markDone(String habitId, DateTime date, bool done) {
+    markHabitDone(habitId, date, done);
+  }
+
   // Get if habit was done on given date
   bool isHabitDone(String habitId, DateTime date) {
     final dateStr = _formatDate(date);
@@ -25,12 +30,12 @@ class HabitStatsProvider extends ChangeNotifier {
     int streak = 0;
     for (int i = 0; i < 365; i++) {
       final day = today.subtract(Duration(days: i));
-      if (isHabitDone(habitId, day))
+      if (isHabitDone(habitId, day)) {
         streak++;
-      else{
+      } else {
         break;
       }
-      }
+    }
     return streak;
   }
 
@@ -56,5 +61,31 @@ class HabitStatsProvider extends ChangeNotifier {
   // Format DateTime as yyyy-MM-dd
   String _formatDate(DateTime date) {
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+}
+
+// Add these extension methods if you use getHabitStartDate and completionsInWeek in stats:
+extension HabitStatsExtensions on HabitStatsProvider {
+  DateTime? getHabitStartDate(String habitId) {
+    // Find earliest date where habit is done
+    final completions = _habitCompletionData[habitId];
+    if (completions == null || completions.isEmpty) return null;
+    final dates = completions.keys
+        .where((k) => completions[k] == true)
+        .map((dateStr) => DateTime.parse(dateStr))
+        .toList();
+    if (dates.isEmpty) return null;
+    dates.sort();
+    return dates.first;
+  }
+
+  int completionsInWeek(String habitId, DateTime weekStart) {
+    // Count completions in the 7 days starting from weekStart
+    int count = 0;
+    for (int i = 0; i < 7; i++) {
+      final day = weekStart.add(Duration(days: i));
+      if (isHabitDone(habitId, day)) count++;
+    }
+    return count;
   }
 }
