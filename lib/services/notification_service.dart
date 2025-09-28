@@ -9,17 +9,14 @@ class NotificationService {
 
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     tz.initializeTimeZones();
 
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings initSettings =
-        InitializationSettings(android: androidSettings);
+    const initSettings = InitializationSettings(android: androidSettings);
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
   }
@@ -31,7 +28,7 @@ class NotificationService {
     DateTime scheduledTime, {
     bool recurringDaily = false,
   }) async {
-    final tz.TZDateTime tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
+    final tzScheduled = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
@@ -47,15 +44,12 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents:
-          recurringDaily ? DateTimeComponents.time : null, // Repeat daily if needed
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.wallClockTime,
+      androidAllowWhileIdle: true,
+      matchDateTimeComponents: recurringDaily ? DateTimeComponents.time : null,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
-  // Consistent cancel API for compatibility
   Future<void> cancel(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
   }
